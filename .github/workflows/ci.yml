@@ -7,9 +7,10 @@ on:
 jobs:
   test:
     runs-on: ${{ matrix.os }}
+    continue-on-error: ${{ matrix.os == 'ubuntu-latest' }}
     strategy:
       matrix:
-        os: [windows-latest]
+        os: [windows-latest, ubuntu-latest]
         python-version: ["3.12"]
 
     steps:
@@ -31,7 +32,7 @@ jobs:
       run: mypy .
     
     - name: Test with pytest
-      run: pytest --maxfail=1 --disable-warnings --cov=lb3 --cov-report=term-missing
+      run: pytest --maxfail=1 --disable-warnings --cov=lb3 --cov-report=term-missing:skip-covered
     
     - name: Generate coverage report
       run: pytest --cov=lb3 --cov-report=term-missing > coverage.txt

@@ -22,7 +22,8 @@
       "Bash(del debug_heartbeat.py debug_supervisor.py)",
       "Bash(git commit:*)",
       "Bash(ruff check:*)",
-      "Bash(del nul)"
+      "Bash(del nul)",
+      "Bash(mypy:*)"
     ],
     "deny": [],
     "ask": []

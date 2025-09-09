@@ -4,6 +4,7 @@ import gzip
 import json
 import os
 import subprocess
+import sys
 import tempfile
 import threading
 import time
@@ -197,6 +198,7 @@ class TestCrashRecoveryIntegration:
             
             db.close()
     
+    @pytest.mark.skipif(sys.platform != "win32", reason="Windows-specific fsync behavior test")
     def test_directory_fsync_durability(self):
         """Test directory fsync for durability (Windows-specific behavior)."""
         with tempfile.TemporaryDirectory() as temp_dir:
