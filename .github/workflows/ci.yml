@@ -1,0 +1,49 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [windows-latest]
+        python-version: ["3.12"]
+
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ matrix.python-version }}
+        cache: 'pip'
+    
+    - name: Install dependencies
+      run: pip install -e ".[dev]"
+    
+    - name: Lint with ruff
+      run: ruff check .
+    
+    - name: Type check with mypy
+      run: mypy .
+    
+    - name: Test with pytest
+      run: pytest --maxfail=1 --disable-warnings --cov=lb3 --cov-report=term-missing
+    
+    - name: Generate coverage report
+      run: pytest --cov=lb3 --cov-report=term-missing > coverage.txt
+    
+    - name: Test with JUnit output
+      run: pytest --maxfail=1 --disable-warnings --cov=lb3 --cov-report=term-missing --junitxml=pytest-junit.xml
+    
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: test-results-${{ matrix.os }}-py${{ matrix.python-version }}
+        path: |
+          coverage.txt
+          pytest-junit.xml
