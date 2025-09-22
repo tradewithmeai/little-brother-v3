@@ -5,7 +5,7 @@ The new authoritative implementation is in database.py with the new schema.
 """
 
 # Re-export all public APIs from database.py for backward compatibility
-# Legacy EventRecord class for backward compatibility  
+# Legacy EventRecord class for backward compatibility
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from typing import Optional
@@ -37,7 +37,7 @@ class EventRecord:
 # Keep legacy imports available
 __all__ = [
     "Database",
-    "EventRecord", 
+    "EventRecord",
     "get_database",
     "create_test_event",
 ]

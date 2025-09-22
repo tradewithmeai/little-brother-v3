@@ -13,7 +13,7 @@ __all__ = [
     "BaseMonitor",
     "MonitorState",
     "MonitorBase",
-    "BatchConfig", 
+    "BatchConfig",
     "ActiveWindowMonitor",
     "KeyboardMonitor",
     "MouseMonitor",

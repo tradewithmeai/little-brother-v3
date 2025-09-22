@@ -1,11 +1,12 @@
 """Event bus system for Little Brother v3."""
 
 import asyncio
+import contextlib
 import weakref
 from collections.abc import Coroutine
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any, Callable, Dict, Set
+from typing import Any, Callable
 
 
 class EventType(Enum):
@@ -29,7 +30,7 @@ class Event:
 
     event_type: EventType
     source: str
-    data: Dict[str, Any]
+    data: dict[str, Any]
     timestamp: float
     event_id: str
 
@@ -42,9 +43,9 @@ class EventBus:
     """Simple event bus for decoupled communication."""
 
     def __init__(self) -> None:
-        self._handlers: Dict[EventType, Set[EventHandler]] = {}
-        self._async_handlers: Dict[EventType, Set[AsyncEventHandler]] = {}
-        self._weak_handlers: Dict[EventType, Set[weakref.ref]] = {}
+        self._handlers: dict[EventType, set[EventHandler]] = {}
+        self._async_handlers: dict[EventType, set[AsyncEventHandler]] = {}
+        self._weak_handlers: dict[EventType, set[weakref.ref]] = {}
 
     def subscribe(self, event_type: EventType, handler: EventHandler) -> None:
         """Subscribe to an event type."""
@@ -82,11 +83,8 @@ class EventBus:
         # Call sync handlers
         if event.event_type in self._handlers:
             for handler in list(self._handlers[event.event_type]):
-                try:
+                with contextlib.suppress(Exception):
                     handler(event)
-                except Exception:
-                    # TODO: Log error
-                    pass
 
         # Call weak reference handlers
         if event.event_type in self._weak_handlers:
@@ -96,11 +94,8 @@ class EventBus:
                 if handler is None:
                     dead_refs.add(handler_ref)
                 else:
-                    try:
+                    with contextlib.suppress(Exception):
                         handler(event)
-                    except Exception:
-                        # TODO: Log error
-                        pass
 
             # Clean up dead references
             self._weak_handlers[event.event_type] -= dead_refs

@@ -7,10 +7,10 @@ import ulid
 
 class MonotonicULIDFactory:
     """Thread-safe monotonic ULID factory."""
-    
+
     def __init__(self):
         self._lock = threading.Lock()
-    
+
     def new_ulid(self) -> ulid.ULID:
         """Generate a new monotonic ULID."""
         # The ulid.monotonic() function is already thread-safe and monotonic
@@ -24,7 +24,7 @@ _ulid_factory = MonotonicULIDFactory()
 
 def new_id() -> str:
     """Generate a new ULID string.
-    
+
     Returns a monotonic, time-sortable ULID string that is thread-safe.
     """
     return str(_ulid_factory.new_ulid())

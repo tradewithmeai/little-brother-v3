@@ -5,7 +5,7 @@ from collections.abc import Iterator
 from dataclasses import asdict, dataclass
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any, Optional
 
 import orjson
 
@@ -20,10 +20,10 @@ class SpoolEntry:
     id: str
     timestamp: float
     monitor: str
-    data: Dict[str, Any]
+    data: dict[str, Any]
 
     @classmethod
-    def create(cls, monitor: str, data: Dict[str, Any]) -> "SpoolEntry":
+    def create(cls, monitor: str, data: dict[str, Any]) -> "SpoolEntry":
         """Create a new spool entry."""
         return cls(
             id=generate_id(),

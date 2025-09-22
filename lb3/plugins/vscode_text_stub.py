@@ -1,7 +1,7 @@
 """VS Code text monitoring plugin stub for Little Brother v3."""
 
 import time
-from typing import Any, Dict
+from typing import Any
 
 from ..logging_setup import get_logger
 from ..monitors.base import BaseMonitor
@@ -38,7 +38,7 @@ class VSCodeTextPlugin(BaseMonitor):
         self._vscode_log_path = config.options.get("vscode_log_path", None)
 
         # State tracking
-        self._active_files: Dict[str, Dict[str, Any]] = {}
+        self._active_files: dict[str, dict[str, Any]] = {}
         self._session_start = time.time()
 
     def run(self) -> None:
@@ -120,11 +120,11 @@ class VSCodeTextPlugin(BaseMonitor):
             )
             self._last_status_emit = current_time
 
-    def get_active_files(self) -> Dict[str, Dict[str, Any]]:
+    def get_active_files(self) -> dict[str, dict[str, Any]]:
         """Get currently active files (stub implementation)."""
         return dict(self._active_files)
 
-    def get_plugin_info(self) -> Dict[str, Any]:
+    def get_plugin_info(self) -> dict[str, Any]:
         """Get plugin information."""
         return {
             "name": "vscode_text",
@@ -140,7 +140,7 @@ class VSCodeTextPlugin(BaseMonitor):
             ],
         }
 
-    def get_current_stats(self) -> Dict[str, Any]:
+    def get_current_stats(self) -> dict[str, Any]:
         """Get current plugin statistics."""
         return {
             "enabled": self._enabled,

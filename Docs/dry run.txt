@@ -1,0 +1,332 @@
+D:\Documents\11Projects\little-brother-v3>lb3 run --dry-run --duration 30 | findstr /i "snapshot"
+2025-09-22T20:38:21.763 [unknown] [system] [MainThread] INFO - Logging initialized - session: unknown, file: lb_data\logs\20250922_203821-15200.log
+2025-09-22T20:38:21.767 [01K5SJC7A7RGJWRAQFMMAZ16WW] [system] [MainThread] INFO - Starting Little Brother v3 monitoring system
+2025-09-22T20:38:21.771 [01K5SJC7A7RGJWRAQFMMAZ16WW] [recovery] [MainThread] INFO - Starting recovery sweep in lb_data\spool
+2025-09-22T20:38:21.779 [01K5SJC7A7RGJWRAQFMMAZ16WW] [recovery] [MainThread] INFO - Recovery sweep: no temp files found
+2025-09-22T20:38:21.829 [01K5SJC7A7RGJWRAQFMMAZ16WW] [keyboard] [MainThread] INFO - pynput keyboard module loaded successfully
+2025-09-22T20:38:21.831 [01K5SJC7A7RGJWRAQFMMAZ16WW] [mouse] [MainThread] INFO - pynput mouse module loaded successfully
+2025-09-22T20:38:21.835 [01K5SJC7A7RGJWRAQFMMAZ16WW] [file] [MainThread] INFO - Default watch paths: ['C:\\Users\\richw', 'C:\\Users\\richw\\Desktop']
+2025-09-22T20:38:21.846 [01K5SJC7A7RGJWRAQFMMAZ16WW] [file] [MainThread] INFO - watchdog loaded successfully
+2025-09-22T20:38:21.851 [01K5SJC7A7RGJWRAQFMMAZ16WW] [browser] [MainThread] INFO - CDP plugin disabled by configuration
+2025-09-22T20:38:21.852 [01K5SJC7A7RGJWRAQFMMAZ16WW] [monitor] [Monitor-heartbeat] INFO - Starting heartbeat monitor (interval: 1.0s, total: 30)
+2025-09-22T20:38:21.853 [01K5SJC7A7RGJWRAQFMMAZ16WW] [monitor] [MainThread] INFO - Started monitor heartbeat (session: 01K5SJC7BKBHK965343RKQW1ST)
+2025-09-22T20:38:21.853 [01K5SJC7A7RGJWRAQFMMAZ16WW] [monitor] [MainThread] INFO - Started monitor context_snapshot (session: 01K5SJC7BNH8X6J3T2MXZM2J56)
+2025-09-22T20:38:21.854 [01K5SJC7A7RGJWRAQFMMAZ16WW] [events] [Monitor-context_snapshot] INFO - Event bus started
+2025-09-22T20:38:21.854 [01K5SJC7A7RGJWRAQFMMAZ16WW] [monitor] [MainThread] INFO - Started monitor keyboard (session: 01K5SJC7BRQEQYWH4YH407W4BQ)
+2025-09-22T20:38:21.854 [01K5SJC7A7RGJWRAQFMMAZ16WW] [context_snapshot] [Monitor-context_snapshot] INFO - Context snapshot monitoring started (idle gap: 7.0s)
+2025-09-22T20:38:21.855 [01K5SJC7A7RGJWRAQFMMAZ16WW] [monitor] [MainThread] INFO - Started monitor mouse (session: 01K5SJC7C70NYQ6CSERW2JQXJY)
+2025-09-22T20:38:21.855 [01K5SJC7A7RGJWRAQFMMAZ16WW] [mouse] [Monitor-mouse] INFO - Mouse monitoring started
+2025-09-22T20:38:21.855 [01K5SJC7A7RGJWRAQFMMAZ16WW] [monitor] [Monitor-active_window] WARNING - Win32 hooks not available, using polling only
+2025-09-22T20:38:21.855 [01K5SJC7A7RGJWRAQFMMAZ16WW] [monitor] [MainThread] INFO - Started monitor active_window (session: 01K5SJC7C9DCTF60318FYRDYYW)
+2025-09-22T20:38:21.856 [01K5SJC7A7RGJWRAQFMMAZ16WW] [monitor] [MainThread] INFO - Started monitor file (session: 01K5SJC7CA9E0MNGHE679RF57R)
+2025-09-22T20:38:21.856 [01K5SJC7A7RGJWRAQFMMAZ16WW] [browser] [Monitor-browser] INFO - Browser monitoring started in fallback mode
+2025-09-22T20:38:21.857 [01K5SJC7A7RGJWRAQFMMAZ16WW] [monitor] [MainThread] INFO - Started monitor browser (session: 01K5SJC7CRHQR7TAMDKKR2TF7S)
+2025-09-22T20:38:21.857 [01K5SJC7A7RGJWRAQFMMAZ16WW] [file] [Monitor-file] INFO - Watching path: C:\Users\richw
+2025-09-22T20:38:21.859 [01K5SJC7A7RGJWRAQFMMAZ16WW] [file] [Monitor-file] INFO - Watching path: C:\Users\richw\Desktop
+2025-09-22T20:38:21.861 [01K5SJC7A7RGJWRAQFMMAZ16WW] [file] [Monitor-file] INFO - File system monitoring started
+2025-09-22T20:38:21.870 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Monitor-active_window] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:21.870 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:21.876 [01K5SJC7A7RGJWRAQFMMAZ16WW] [keyboard] [Monitor-keyboard] INFO - Keyboard monitoring started
+2025-09-22T20:38:21.898 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Monitor-active_window] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:21.903 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Monitor-active_window] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:21.968 [01K5SJC7A7RGJWRAQFMMAZ16WW] [monitor] [Monitor-active_window] INFO - Active window monitoring started with Win32 hooks
+2025-09-22T20:38:22.053 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:22.096 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:22.129 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:22.162 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:22.195 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:22.228 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:22.433 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:23.155 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:24.016 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:24.052 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:24.089 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:24.129 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:24.161 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:24.203 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:24.244 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:24.287 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:24.321 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:24.354 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:24.540 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:24.577 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:24.611 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:24.646 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:24.677 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:24.711 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:24.746 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:24.779 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:24.811 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:24.845 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:24.881 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:24.920 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:24.955 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:25.623 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:25.880 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:25.911 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:25.954 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:26.005 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:26.052 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:26.096 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:26.128 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:26.295 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:26.328 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:26.362 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:26.402 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:26.437 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:26.470 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:26.502 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:26.545 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:26.577 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:26.619 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:26.653 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:26.839 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:26.870 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:26.912 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:26.946 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:26.986 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:27.022 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:27.057 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:27.097 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:27.137 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:27.170 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:27.245 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:27.277 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:27.319 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:27.450 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:27.954 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:27.995 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:28.037 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:28.079 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:28.119 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:28.305 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:28.347 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:28.378 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:28.419 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:28.452 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:28.493 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:28.527 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:28.569 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:28.602 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:28.644 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:28.677 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:28.719 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:28.752 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:29.580 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:29.677 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:30.693 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:30.733 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:31.922 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:31.959 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:31.992 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:32.062 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:32.161 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:32.200 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:32.250 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:32.283 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:32.318 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:32.351 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:32.384 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:32.445 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:32.533 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:32.566 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:32.600 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:32.633 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:32.666 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:32.708 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:32.742 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:32.775 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:32.809 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:32.844 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:32.875 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:32.966 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:33.448 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:34.161 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:34.318 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:34.980 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:35.009 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:35.050 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:35.083 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:35.116 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:35.351 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:36.013 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:36.050 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:36.107 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:36.152 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:36.191 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:36.397 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:36.441 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:36.502 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:36.590 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:36.625 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:36.657 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:36.690 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:36.724 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:36.758 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:36.790 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:37.024 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:37.116 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:37.149 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:37.182 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:37.217 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:37.249 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:37.313 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:37.470 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:37.766 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:37.963 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:38.416 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:38.538 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:38.786 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:39.315 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:39.349 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:39.390 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:39.959 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:39.998 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:40.031 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:40.066 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:40.106 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:40.140 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:40.189 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:40.223 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:40.265 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:40.307 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:40.349 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:40.381 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:40.423 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:40.457 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:40.497 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:40.531 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:40.575 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:40.615 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:40.881 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:40.914 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:40.958 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:40.998 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:41.040 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:41.075 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:41.114 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:41.148 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:41.189 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:41.224 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:41.263 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:41.298 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:41.340 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:41.375 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:41.415 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:41.449 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:41.490 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:41.525 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:41.564 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:41.598 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:41.640 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:41.702 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:41.806 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:41.840 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:41.873 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:42.482 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:42.807 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:42.856 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:42.897 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:42.939 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:42.979 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:43.418 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:43.464 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:43.767 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:43.816 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:43.855 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:43.924 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:43.964 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:43.997 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:44.037 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:44.077 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:44.143 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:44.238 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:44.326 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:44.485 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:44.579 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:44.738 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:44.893 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:44.979 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:45.071 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:45.105 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:45.147 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:45.180 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:45.222 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:45.255 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:45.939 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:45.972 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:46.014 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:46.459 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:46.497 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:47.154 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:47.492 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:47.835 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:47.883 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:47.913 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:47.955 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:47.987 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:48.021 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:48.054 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:48.087 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:48.122 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:48.163 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:48.196 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:48.230 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:48.265 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:48.306 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:48.338 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:48.372 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:48.405 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:48.438 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:48.474 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:48.513 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:48.846 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:48.888 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:48.949 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:48.987 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:49.021 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:49.062 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:49.409 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:50.027 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:50.107 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:50.139 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:50.285 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:50.324 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:50.363 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:50.397 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:50.432 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:50.473 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:50.514 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:50.548 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:51.035 [01K5SJC7A7RGJWRAQFMMAZ16WW] [monitor] [Monitor-heartbeat] INFO - Reached total beats limit (30)
+2025-09-22T20:38:51.035 [01K5SJC7A7RGJWRAQFMMAZ16WW] [monitor] [Monitor-heartbeat] INFO - Stopping heartbeat monitor after 30 beats
+2025-09-22T20:38:51.109 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:51.154 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:51.196 [01K5SJC7A7RGJWRAQFMMAZ16WW] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T20:38:51.379 [01K5SJC7A7RGJWRAQFMMAZ16WW] [supervisor] [MainThread] INFO - Heartbeat monitor finished, shutting down naturally
+2025-09-22T20:38:51.379 [01K5SJC7A7RGJWRAQFMMAZ16WW] [browser] [Monitor-browser] INFO - Browser monitoring stopped
+2025-09-22T20:38:51.379 [01K5SJC7A7RGJWRAQFMMAZ16WW] [monitor] [MainThread] INFO - Stopped monitor browser
+2025-09-22T20:38:51.380 [01K5SJC7A7RGJWRAQFMMAZ16WW] [file] [Monitor-file] INFO - File system monitoring stopped
+2025-09-22T20:38:51.380 [01K5SJC7A7RGJWRAQFMMAZ16WW] [monitor] [MainThread] INFO - Stopped monitor file
+2025-09-22T20:38:51.381 [01K5SJC7A7RGJWRAQFMMAZ16WW] [monitor] [Monitor-active_window] INFO - Active window monitoring stopped
+2025-09-22T20:38:51.381 [01K5SJC7A7RGJWRAQFMMAZ16WW] [monitor] [MainThread] INFO - Stopped monitor active_window
+2025-09-22T20:38:51.381 [01K5SJC7A7RGJWRAQFMMAZ16WW] [mouse] [Monitor-mouse] INFO - Mouse monitoring stopped
+2025-09-22T20:38:51.382 [01K5SJC7A7RGJWRAQFMMAZ16WW] [monitor] [MainThread] INFO - Stopped monitor mouse
+2025-09-22T20:38:51.382 [01K5SJC7A7RGJWRAQFMMAZ16WW] [keyboard] [Monitor-keyboard] INFO - Keyboard monitoring stopped
+2025-09-22T20:38:51.382 [01K5SJC7A7RGJWRAQFMMAZ16WW] [monitor] [MainThread] INFO - Stopped monitor keyboard
+2025-09-22T20:38:51.382 [01K5SJC7A7RGJWRAQFMMAZ16WW] [context_snapshot] [Monitor-context_snapshot] INFO - Context snapshot monitoring stopped
+2025-09-22T20:38:51.383 [01K5SJC7A7RGJWRAQFMMAZ16WW] [monitor] [MainThread] INFO - Stopped monitor context_snapshot
+[context_snapshot] snapshot at 1758573508889: {
+  "monitor": "context_snapshot",
+  "action": "snapshot",
+[context_snapshot] snapshot at 1758573515936: {
+  "monitor": "context_snapshot",
+  "action": "snapshot",
+[context_snapshot] snapshot at 1758573522983: {
+  "monitor": "context_snapshot",
+  "action": "snapshot",
+[context_snapshot] snapshot at 1758573530033: {
+  "monitor": "context_snapshot",
+  "action": "snapshot",
+
+D:\Documents\11Projects\little-brother-v3>

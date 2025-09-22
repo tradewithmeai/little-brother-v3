@@ -2,7 +2,11 @@ name: CI
 
 on:
   push:
+    branches: [ main ]
+    tags:
+      - "v3.*"
   pull_request:
+    branches: [ main ]
 
 jobs:
   test:
@@ -15,31 +19,31 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
-    
+
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v5
       with:
         python-version: ${{ matrix.python-version }}
         cache: 'pip'
-    
+
     - name: Install dependencies
       run: pip install -e ".[dev]"
-    
+
     - name: Lint with ruff
       run: ruff check .
-    
+
     - name: Type check with mypy
       run: mypy .
-    
+
     - name: Test with pytest
       run: pytest --maxfail=1 --disable-warnings --cov=lb3 --cov-report=term-missing:skip-covered
-    
+
     - name: Generate coverage report
       run: pytest --cov=lb3 --cov-report=term-missing > coverage.txt
-    
+
     - name: Test with JUnit output
       run: pytest --maxfail=1 --disable-warnings --cov=lb3 --cov-report=term-missing --junitxml=pytest-junit.xml
-    
+
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
       if: always()
@@ -48,3 +52,54 @@ jobs:
         path: |
           coverage.txt
           pytest-junit.xml
+
+  release:
+    needs: test
+    runs-on: ${{ matrix.os }}
+    if: startsWith(github.ref, 'refs/tags/v3.')
+    continue-on-error: ${{ matrix.os == 'ubuntu-latest' }}
+    strategy:
+      matrix:
+        os: [windows-latest, ubuntu-latest]
+        python-version: ["3.12"]
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ matrix.python-version }}
+        cache: 'pip'
+
+    - name: Install build dependencies
+      run: pip install build
+
+    - name: Build distribution
+      run: python -m build
+
+    - name: Generate checksums (Windows)
+      if: matrix.os == 'windows-latest'
+      shell: pwsh
+      run: |
+        $files = Get-ChildItem dist\*.tar.gz, dist\*.whl
+        $checksums = foreach ($file in $files) {
+          $hash = (Get-FileHash -Path $file.FullName -Algorithm SHA256).Hash.ToLower()
+          "$hash  $($file.Name)"
+        }
+        $checksums | Out-File -FilePath dist\SHA256SUMS.txt -Encoding utf8
+
+    - name: Generate checksums (Ubuntu)
+      if: matrix.os == 'ubuntu-latest'
+      run: |
+        cd dist
+        sha256sum *.tar.gz *.whl > SHA256SUMS.txt
+
+    - name: Upload release artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: release-artifacts-${{ matrix.os }}
+        path: |
+          dist/*.tar.gz
+          dist/*.whl
+          dist/SHA256SUMS.txt

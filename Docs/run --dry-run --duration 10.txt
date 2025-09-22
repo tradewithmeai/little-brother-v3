@@ -1,0 +1,948 @@
+D:\Documents\11Projects\little-brother-v3>lb3 run --dry-run --duration 10
+2025-09-22T15:36:40.919 [unknown] [system] [MainThread] INFO - Logging initialized - session: unknown, file: lb_data\logs\20250922_153640-26912.log
+2025-09-22T15:36:40.935 [01K5S13TQ7Y29T2V0R06YTDQM5] [system] [MainThread] INFO - Starting Little Brother v3 monitoring system
+2025-09-22T15:36:40.935 [01K5S13TQ7Y29T2V0R06YTDQM5] [recovery] [MainThread] INFO - Starting recovery sweep in lb_data\spool
+2025-09-22T15:36:40.951 [01K5S13TQ7Y29T2V0R06YTDQM5] [recovery] [MainThread] INFO - Recovery sweep: no temp files found
+2025-09-22T15:36:41.143 [01K5S13TQ7Y29T2V0R06YTDQM5] [keyboard] [MainThread] INFO - pynput keyboard module loaded successfully
+2025-09-22T15:36:41.147 [01K5S13TQ7Y29T2V0R06YTDQM5] [mouse] [MainThread] INFO - pynput mouse module loaded successfully
+2025-09-22T15:36:41.151 [01K5S13TQ7Y29T2V0R06YTDQM5] [file] [MainThread] INFO - Default watch paths: ['C:\\Users\\richw', 'C:\\Users\\richw\\Desktop']
+2025-09-22T15:36:41.165 [01K5S13TQ7Y29T2V0R06YTDQM5] [file] [MainThread] INFO - watchdog loaded successfully
+2025-09-22T15:36:41.171 [01K5S13TQ7Y29T2V0R06YTDQM5] [browser] [MainThread] INFO - CDP plugin disabled by configuration
+[DRY-RUN] Starting monitors for 10 seconds...
+[DRY-RUN] Events will be printed to console
+2025-09-22T15:36:41.176 [01K5S13TQ7Y29T2V0R06YTDQM5] [monitor] [Monitor-heartbeat] INFO - Starting heartbeat monitor (interval: 1.0s, total: 10)
+2025-09-22T15:36:41.176 [01K5S13TQ7Y29T2V0R06YTDQM5] [monitor] [MainThread] INFO - Started monitor heartbeat (session: 01K5S13TX0Y4QZ1KXGKPCG9MMP)
+2025-09-22T15:36:41.176 [01K5S13TQ7Y29T2V0R06YTDQM5] [monitor] [MainThread] INFO - Started monitor context_snapshot (session: 01K5S13TX2Q71Z2T7T8KKQ5ZD1)
+2025-09-22T15:36:41.178 [01K5S13TQ7Y29T2V0R06YTDQM5] [events] [Monitor-context_snapshot] INFO - Event bus started
+2025-09-22T15:36:41.178 [01K5S13TQ7Y29T2V0R06YTDQM5] [monitor] [MainThread] INFO - Started monitor keyboard (session: 01K5S13TX7TSSVW22F1Y8WKJSP)
+2025-09-22T15:36:41.178 [01K5S13TQ7Y29T2V0R06YTDQM5] [context_snapshot] [Monitor-context_snapshot] INFO - Context snapshot monitoring started (idle gap: 7.0s)
+2025-09-22T15:36:41.178 [01K5S13TQ7Y29T2V0R06YTDQM5] [monitor] [MainThread] INFO - Started monitor mouse (session: 01K5S13TXV0QVWXV19Q713GYBA)
+2025-09-22T15:36:41.178 [01K5S13TQ7Y29T2V0R06YTDQM5] [mouse] [Monitor-mouse] INFO - Mouse monitoring started
+2025-09-22T15:36:41.178 [01K5S13TQ7Y29T2V0R06YTDQM5] [monitor] [Monitor-active_window] WARNING - Win32 hooks not available, using polling only
+2025-09-22T15:36:41.178 [01K5S13TQ7Y29T2V0R06YTDQM5] [monitor] [MainThread] INFO - Started monitor active_window (session: 01K5S13TXX069WK9BTY6GP66F6)
+2025-09-22T15:36:41.180 [01K5S13TQ7Y29T2V0R06YTDQM5] [monitor] [MainThread] INFO - Started monitor file (session: 01K5S13TXZKADVTQ73EP0QWESB)
+2025-09-22T15:36:41.180 [01K5S13TQ7Y29T2V0R06YTDQM5] [browser] [Monitor-browser] INFO - Browser monitoring started in fallback mode
+2025-09-22T15:36:41.180 [01K5S13TQ7Y29T2V0R06YTDQM5] [monitor] [MainThread] INFO - Started monitor browser (session: 01K5S13TYF87SNJAP6E08VTY34)
+Started 7/7 monitors
+2025-09-22T15:36:41.180 [01K5S13TQ7Y29T2V0R06YTDQM5] [file] [Monitor-file] INFO - Watching path: C:\Users\richw
+2025-09-22T15:36:41.182 [01K5S13TQ7Y29T2V0R06YTDQM5] [file] [Monitor-file] INFO - Watching path: C:\Users\richw\Desktop
+2025-09-22T15:36:41.184 [01K5S13TQ7Y29T2V0R06YTDQM5] [file] [Monitor-file] INFO - File system monitoring started
+2025-09-22T15:36:41.192 [01K5S13TQ7Y29T2V0R06YTDQM5] [keyboard] [Monitor-keyboard] INFO - Keyboard monitoring started
+2025-09-22T15:36:41.220 [01K5S13TQ7Y29T2V0R06YTDQM5] [database] [Monitor-active_window] INFO - Database initialized at lb_data\local.db
+2025-09-22T15:36:41.220 [01K5S13TQ7Y29T2V0R06YTDQM5] [database] [Monitor-active_window] INFO - Database initialized at lb_data\local.db
+2025-09-22T15:36:41.236 [01K5S13TQ7Y29T2V0R06YTDQM5] [database] [Monitor-active_window] INFO - Database initialized at lb_data\local.db
+2025-09-22T15:36:41.316 [01K5S13TQ7Y29T2V0R06YTDQM5] [monitor] [Monitor-active_window] INFO - Active window monitoring started with Win32 hooks
+2025-09-22T15:36:41.632 [01K5S13TQ7Y29T2V0R06YTDQM5] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T15:36:42.092 [01K5S13TQ7Y29T2V0R06YTDQM5] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T15:36:42.187 [01K5S13TQ7Y29T2V0R06YTDQM5] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T15:36:42.282 [01K5S13TQ7Y29T2V0R06YTDQM5] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T15:36:42.314 [01K5S13TQ7Y29T2V0R06YTDQM5] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T15:36:42.346 [01K5S13TQ7Y29T2V0R06YTDQM5] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T15:36:42.378 [01K5S13TQ7Y29T2V0R06YTDQM5] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T15:36:42.410 [01K5S13TQ7Y29T2V0R06YTDQM5] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T15:36:42.457 [01K5S13TQ7Y29T2V0R06YTDQM5] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T15:36:42.488 [01K5S13TQ7Y29T2V0R06YTDQM5] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T15:36:42.530 [01K5S13TQ7Y29T2V0R06YTDQM5] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T15:36:42.562 [01K5S13TQ7Y29T2V0R06YTDQM5] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T15:36:42.596 [01K5S13TQ7Y29T2V0R06YTDQM5] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T15:36:42.631 [01K5S13TQ7Y29T2V0R06YTDQM5] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T15:36:42.663 [01K5S13TQ7Y29T2V0R06YTDQM5] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+[file] saved at 1758555401664: {
+  "id": "01K5S13VE0WAWT7Y5SQ256K4S2",
+  "ts_utc": 1758555401664,
+  "monitor": "file",
+  "action": "saved",
+  "subject_type": "file",
+  "subject_id": "01K4QY0GWFWECG4D3GXPTP9HKF",
+  "session_id": "01K5S13TXZKADVTQ73EP0QWESB",
+  "batch_id": null,
+  "pid": null,
+  "exe_name": null,
+  "exe_path_hash": null,
+  "window_title_hash": null,
+  "url_hash": null,
+  "file_path_hash": null,
+  "attrs_json": "{\"op\":\"watchdog\",\"src\":\"FileWatchEventHandler\",\"moved_from\":false}"
+}
+[file] created at 1758555402126: {
+  "id": "01K5S13VWEHCWXT90Z37P78ND0",
+  "ts_utc": 1758555402126,
+  "monitor": "file",
+  "action": "created",
+  "subject_type": "file",
+  "subject_id": "01K5S13VVC3C3XNWQV294XYKTC",
+  "session_id": "01K5S13TXZKADVTQ73EP0QWESB",
+  "batch_id": null,
+  "pid": null,
+  "exe_name": null,
+  "exe_path_hash": null,
+  "window_title_hash": null,
+  "url_hash": null,
+  "file_path_hash": null,
+  "attrs_json": "{\"op\":\"watchdog\",\"src\":\"FileWatchEventHandler\",\"moved_from\":false}"
+}
+[file] saved at 1758555402266: {
+  "id": "01K5S13W0TFDND0TEEHVQN0695",
+  "ts_utc": 1758555402266,
+  "monitor": "file",
+  "action": "saved",
+  "subject_type": "file",
+  "subject_id": "01K5S13VVC3C3XNWQV294XYKTC",
+  "session_id": "01K5S13TXZKADVTQ73EP0QWESB",
+  "batch_id": null,
+  "pid": null,
+  "exe_name": null,
+  "exe_path_hash": null,
+  "window_title_hash": null,
+  "url_hash": null,
+  "file_path_hash": null,
+  "attrs_json": "{\"op\":\"watchdog\",\"src\":\"FileWatchEventHandler\",\"moved_from\":false}"
+}
+[file] created at 1758555402310: {
+  "id": "01K5S13W269GA8X3NXTSZ7E2KP",
+  "ts_utc": 1758555402310,
+  "monitor": "file",
+  "action": "created",
+  "subject_type": "file",
+  "subject_id": "01K5S13W1AT8BPCRAJETRAMAXN",
+  "session_id": "01K5S13TXZKADVTQ73EP0QWESB",
+  "batch_id": null,
+  "pid": null,
+  "exe_name": null,
+  "exe_path_hash": null,
+  "window_title_hash": null,
+  "url_hash": null,
+  "file_path_hash": null,
+  "attrs_json": "{\"op\":\"watchdog\",\"src\":\"FileWatchEventHandler\",\"moved_from\":false}"
+}
+[file] saved at 1758555402330: {
+  "id": "01K5S13W2T6AFD5QA7XW8J4T9C",
+  "ts_utc": 1758555402330,
+  "monitor": "file",
+  "action": "saved",
+  "subject_type": "file",
+  "subject_id": "01K5S13W2APZ6FMER6MRNXCVE1",
+  "session_id": "01K5S13TXZKADVTQ73EP0QWESB",
+  "batch_id": null,
+  "pid": null,
+  "exe_name": null,
+  "exe_path_hash": null,
+  "window_title_hash": null,
+  "url_hash": null,
+  "file_path_hash": null,
+  "attrs_json": "{\"op\":\"watchdog\",\"src\":\"FileWatchEventHandler\",\"moved_from\":false}"
+}
+[file] saved at 1758555402362: {
+  "id": "01K5S13W3TFZXN09T4GVYQEHTQ",
+  "ts_utc": 1758555402362,
+  "monitor": "file",
+  "action": "saved",
+  "subject_type": "file",
+  "subject_id": "01K5S13VVC3C3XNWQV294XYKTC",
+  "session_id": "01K5S13TXZKADVTQ73EP0QWESB",
+  "batch_id": null,
+  "pid": null,
+  "exe_name": null,
+  "exe_path_hash": null,
+  "window_title_hash": null,
+  "url_hash": null,
+  "file_path_hash": null,
+  "attrs_json": "{\"op\":\"watchdog\",\"src\":\"FileWatchEventHandler\",\"moved_from\":false}"
+}
+[file] saved at 1758555402410: {
+  "id": "01K5S13W5A9065PY1D2B4ASHV9",
+  "ts_utc": 1758555402410,
+  "monitor": "file",
+  "action": "saved",
+  "subject_type": "file",
+  "subject_id": "01K5S13W4A46HYQ3G9VA0RJ08P",
+  "session_id": "01K5S13TXZKADVTQ73EP0QWESB",
+  "batch_id": null,
+  "pid": null,
+  "exe_name": null,
+  "exe_path_hash": null,
+  "window_title_hash": null,
+  "url_hash": null,
+  "file_path_hash": null,
+  "attrs_json": "{\"op\":\"watchdog\",\"src\":\"FileWatchEventHandler\",\"moved_from\":false}"
+}
+[file] deleted at 1758555402441: {
+  "id": "01K5S13W69E1YPJK7S15GGDTSP",
+  "ts_utc": 1758555402441,
+  "monitor": "file",
+  "action": "deleted",
+  "subject_type": "file",
+  "subject_id": "01K5S13VVC3C3XNWQV294XYKTC",
+  "session_id": "01K5S13TXZKADVTQ73EP0QWESB",
+  "batch_id": null,
+  "pid": null,
+  "exe_name": null,
+  "exe_path_hash": null,
+  "window_title_hash": null,
+  "url_hash": null,
+  "file_path_hash": null,
+  "attrs_json": "{\"op\":\"watchdog\",\"src\":\"FileWatchEventHandler\",\"moved_from\":false}"
+}
+[file] deleted at 1758555402472: {
+  "id": "01K5S13W78WF891Z3Q9YG1TNKP",
+  "ts_utc": 1758555402472,
+  "monitor": "file",
+  "action": "deleted",
+  "subject_type": "file",
+  "subject_id": "01K5S13W1AT8BPCRAJETRAMAXN",
+  "session_id": "01K5S13TXZKADVTQ73EP0QWESB",
+  "batch_id": null,
+  "pid": null,
+  "exe_name": null,
+  "exe_path_hash": null,
+  "window_title_hash": null,
+  "url_hash": null,
+  "file_path_hash": null,
+  "attrs_json": "{\"op\":\"watchdog\",\"src\":\"FileWatchEventHandler\",\"moved_from\":false}"
+}
+[file] saved at 1758555402510: {
+  "id": "01K5S13W8E6SKFFD5C57DD34VF",
+  "ts_utc": 1758555402510,
+  "monitor": "file",
+  "action": "saved",
+  "subject_type": "file",
+  "subject_id": "01K4QY07CWTEQ16HXDCKF408VZ",
+  "session_id": "01K5S13TXZKADVTQ73EP0QWESB",
+  "batch_id": null,
+  "pid": null,
+  "exe_name": null,
+  "exe_path_hash": null,
+  "window_title_hash": null,
+  "url_hash": null,
+  "file_path_hash": null,
+  "attrs_json": "{\"op\":\"watchdog\",\"src\":\"FileWatchEventHandler\",\"moved_from\":false}"
+}
+[file] created at 1758555402536: {
+  "id": "01K5S13W98TX44BJA9VZ8YZTFX",
+  "ts_utc": 1758555402536,
+  "monitor": "file",
+  "action": "created",
+  "subject_type": "file",
+  "subject_id": "01K5S13W9267H12A9G1HND4WAA",
+  "session_id": "01K5S13TXZKADVTQ73EP0QWESB",
+  "batch_id": null,
+  "pid": null,
+  "exe_name": null,
+  "exe_path_hash": null,
+  "window_title_hash": null,
+  "url_hash": null,
+  "file_path_hash": null,
+  "attrs_json": "{\"op\":\"watchdog\",\"src\":\"FileWatchEventHandler\",\"moved_from\":false}"
+}
+[file] saved at 1758555402584: {
+  "id": "01K5S13WAR0DCKK0ZENZEFBRD1",
+  "ts_utc": 1758555402584,
+  "monitor": "file",
+  "action": "saved",
+  "subject_type": "file",
+  "subject_id": "01K4QY07E0YV8R71NPPD9W0THC",
+  "session_id": "01K5S13TXZKADVTQ73EP0QWESB",
+  "batch_id": null,
+  "pid": null,
+  "exe_name": null,
+  "exe_path_hash": null,
+  "window_title_hash": null,
+  "url_hash": null,
+  "file_path_hash": null,
+  "attrs_json": "{\"op\":\"watchdog\",\"src\":\"FileWatchEventHandler\",\"moved_from\":false}"
+}
+[file] saved at 1758555402615: {
+  "id": "01K5S13WBQZH5ASV9MBMQ9KWWZ",
+  "ts_utc": 1758555402615,
+  "monitor": "file",
+  "action": "saved",
+  "subject_type": "file",
+  "subject_id": "01K5S13W9267H12A9G1HND4WAA",
+  "session_id": "01K5S13TXZKADVTQ73EP0QWESB",
+  "batch_id": null,
+  "pid": null,
+  "exe_name": null,
+  "exe_path_hash": null,
+  "window_title_hash": null,
+  "url_hash": null,
+  "file_path_hash": null,
+  "attrs_json": "{\"op\":\"watchdog\",\"src\":\"FileWatchEventHandler\",\"moved_from\":false}"
+}
+[file] saved at 1758555402647: {
+  "id": "01K5S13WCQA86YEHFSSV479KCE",
+  "ts_utc": 1758555402647,
+  "monitor": "file",
+  "action": "saved",
+  "subject_type": "file",
+  "subject_id": "01K4QY07CWTEQ16HXDCKF408VZ",
+  "session_id": "01K5S13TXZKADVTQ73EP0QWESB",
+  "batch_id": null,
+  "pid": null,
+  "exe_name": null,
+  "exe_path_hash": null,
+  "window_title_hash": null,
+  "url_hash": null,
+  "file_path_hash": null,
+  "attrs_json": "{\"op\":\"watchdog\",\"src\":\"FileWatchEventHandler\",\"moved_from\":false}"
+}
+2025-09-22T15:36:42.712 [01K5S13TQ7Y29T2V0R06YTDQM5] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T15:36:42.742 [01K5S13TQ7Y29T2V0R06YTDQM5] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T15:36:42.774 [01K5S13TQ7Y29T2V0R06YTDQM5] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T15:36:42.810 [01K5S13TQ7Y29T2V0R06YTDQM5] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T15:36:42.853 [01K5S13TQ7Y29T2V0R06YTDQM5] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T15:36:42.885 [01K5S13TQ7Y29T2V0R06YTDQM5] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T15:36:43.647 [01K5S13TQ7Y29T2V0R06YTDQM5] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T15:36:43.837 [01K5S13TQ7Y29T2V0R06YTDQM5] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+[file] created at 1758555402694: {
+  "id": "01K5S13WE69BXVFC7BMXKRAAT3",
+  "ts_utc": 1758555402694,
+  "monitor": "file",
+  "action": "created",
+  "subject_type": "file",
+  "subject_id": "01K5S13WD7FGMDV7XJ9B0ZYEX6",
+  "session_id": "01K5S13TXZKADVTQ73EP0QWESB",
+  "batch_id": null,
+  "pid": null,
+  "exe_name": null,
+  "exe_path_hash": null,
+  "window_title_hash": null,
+  "url_hash": null,
+  "file_path_hash": null,
+  "attrs_json": "{\"op\":\"watchdog\",\"src\":\"FileWatchEventHandler\",\"moved_from\":false}"
+}
+[file] saved at 1758555402726: {
+  "id": "01K5S13WF64X5SJ23NRVYPHV53",
+  "ts_utc": 1758555402726,
+  "monitor": "file",
+  "action": "saved",
+  "subject_type": "file",
+  "subject_id": "01K4QY07CWTEQ16HXDCKF408VZ",
+  "session_id": "01K5S13TXZKADVTQ73EP0QWESB",
+  "batch_id": null,
+  "pid": null,
+  "exe_name": null,
+  "exe_path_hash": null,
+  "window_title_hash": null,
+  "url_hash": null,
+  "file_path_hash": null,
+  "attrs_json": "{\"op\":\"watchdog\",\"src\":\"FileWatchEventHandler\",\"moved_from\":false}"
+}
+[file] saved at 1758555402774: {
+  "id": "01K5S13WGPN0HKWYZGXWG7YVNF",
+  "ts_utc": 1758555402774,
+  "monitor": "file",
+  "action": "saved",
+  "subject_type": "file",
+  "subject_id": "01K5S13WFPHJRX2ZYTD9TEJHV7",
+  "session_id": "01K5S13TXZKADVTQ73EP0QWESB",
+  "batch_id": null,
+  "pid": null,
+  "exe_name": null,
+  "exe_path_hash": null,
+  "window_title_hash": null,
+  "url_hash": null,
+  "file_path_hash": null,
+  "attrs_json": "{\"op\":\"watchdog\",\"src\":\"FileWatchEventHandler\",\"moved_from\":false}"
+}
+[file] saved at 1758555402806: {
+  "id": "01K5S13WHPKXPK24FBKMMK1B80",
+  "ts_utc": 1758555402806,
+  "monitor": "file",
+  "action": "saved",
+  "subject_type": "file",
+  "subject_id": "01K5S13W9267H12A9G1HND4WAA",
+  "session_id": "01K5S13TXZKADVTQ73EP0QWESB",
+  "batch_id": null,
+  "pid": null,
+  "exe_name": null,
+  "exe_path_hash": null,
+  "window_title_hash": null,
+  "url_hash": null,
+  "file_path_hash": null,
+  "attrs_json": "{\"op\":\"watchdog\",\"src\":\"FileWatchEventHandler\",\"moved_from\":false}"
+}
+[file] saved at 1758555402837: {
+  "id": "01K5S13WJNYSH9BMJSRJ4ZJH0H",
+  "ts_utc": 1758555402837,
+  "monitor": "file",
+  "action": "saved",
+  "subject_type": "file",
+  "subject_id": "01K5S13WHTC15K7VFP7E2J9HS6",
+  "session_id": "01K5S13TXZKADVTQ73EP0QWESB",
+  "batch_id": null,
+  "pid": null,
+  "exe_name": null,
+  "exe_path_hash": null,
+  "window_title_hash": null,
+  "url_hash": null,
+  "file_path_hash": null,
+  "attrs_json": "{\"op\":\"watchdog\",\"src\":\"FileWatchEventHandler\",\"moved_from\":false}"
+}
+[file] deleted at 1758555402885: {
+  "id": "01K5S13WM5T03N4N7GDKA0Z1GS",
+  "ts_utc": 1758555402885,
+  "monitor": "file",
+  "action": "deleted",
+  "subject_type": "file",
+  "subject_id": "01K5S13W9267H12A9G1HND4WAA",
+  "session_id": "01K5S13TXZKADVTQ73EP0QWESB",
+  "batch_id": null,
+  "pid": null,
+  "exe_name": null,
+  "exe_path_hash": null,
+  "window_title_hash": null,
+  "url_hash": null,
+  "file_path_hash": null,
+  "attrs_json": "{\"op\":\"watchdog\",\"src\":\"FileWatchEventHandler\",\"moved_from\":false}"
+}
+[file] deleted at 1758555402917: {
+  "id": "01K5S13WN5BBB1J58C28SHTT0T",
+  "ts_utc": 1758555402917,
+  "monitor": "file",
+  "action": "deleted",
+  "subject_type": "file",
+  "subject_id": "01K5S13WD7FGMDV7XJ9B0ZYEX6",
+  "session_id": "01K5S13TXZKADVTQ73EP0QWESB",
+  "batch_id": null,
+  "pid": null,
+  "exe_name": null,
+  "exe_path_hash": null,
+  "window_title_hash": null,
+  "url_hash": null,
+  "file_path_hash": null,
+  "attrs_json": "{\"op\":\"watchdog\",\"src\":\"FileWatchEventHandler\",\"moved_from\":false}"
+}
+[file] saved at 1758555403683: {
+  "id": "01K5S13XD3VVZH84X0ADP535ME",
+  "ts_utc": 1758555403683,
+  "monitor": "file",
+  "action": "saved",
+  "subject_type": "file",
+  "subject_id": "01K4QY07CWTEQ16HXDCKF408VZ",
+  "session_id": "01K5S13TXZKADVTQ73EP0QWESB",
+  "batch_id": null,
+  "pid": null,
+  "exe_name": null,
+  "exe_path_hash": null,
+  "window_title_hash": null,
+  "url_hash": null,
+  "file_path_hash": null,
+  "attrs_json": "{\"op\":\"watchdog\",\"src\":\"FileWatchEventHandler\",\"moved_from\":false}"
+}
+[file] saved at 1758555403853: {
+  "id": "01K5S13XJDCTY9E4Q499P5698Q",
+  "ts_utc": 1758555403853,
+  "monitor": "file",
+  "action": "saved",
+  "subject_type": "file",
+  "subject_id": "01K4QY0C6KT9QESWCKZRJGCJ9R",
+  "session_id": "01K5S13TXZKADVTQ73EP0QWESB",
+  "batch_id": null,
+  "pid": null,
+  "exe_name": null,
+  "exe_path_hash": null,
+  "window_title_hash": null,
+  "url_hash": null,
+  "file_path_hash": null,
+  "attrs_json": "{\"op\":\"watchdog\",\"src\":\"FileWatchEventHandler\",\"moved_from\":false}"
+}
+2025-09-22T15:36:45.672 [01K5S13TQ7Y29T2V0R06YTDQM5] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+[file] created at 1758555405688: {
+  "id": "01K5S13ZBRGWSPPTW70CP70TVR",
+  "ts_utc": 1758555405688,
+  "monitor": "file",
+  "action": "created",
+  "subject_type": "file",
+  "subject_id": "01K4QY12KSYGDD6T7E50K42R4H",
+  "session_id": "01K5S13TXZKADVTQ73EP0QWESB",
+  "batch_id": null,
+  "pid": null,
+  "exe_name": null,
+  "exe_path_hash": null,
+  "window_title_hash": null,
+  "url_hash": null,
+  "file_path_hash": null,
+  "attrs_json": "{\"op\":\"watchdog\",\"src\":\"FileWatchEventHandler\",\"moved_from\":false}"
+}
+2025-09-22T15:36:45.712 [01K5S13TQ7Y29T2V0R06YTDQM5] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T15:36:45.735 [01K5S13TQ7Y29T2V0R06YTDQM5] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T15:36:45.783 [01K5S13TQ7Y29T2V0R06YTDQM5] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T15:36:46.644 [01K5S13TQ7Y29T2V0R06YTDQM5] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T15:36:46.686 [01K5S13TQ7Y29T2V0R06YTDQM5] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T15:36:46.727 [01K5S13TQ7Y29T2V0R06YTDQM5] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T15:36:46.794 [01K5S13TQ7Y29T2V0R06YTDQM5] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T15:36:46.860 [01K5S13TQ7Y29T2V0R06YTDQM5] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T15:36:46.892 [01K5S13TQ7Y29T2V0R06YTDQM5] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T15:36:46.923 [01K5S13TQ7Y29T2V0R06YTDQM5] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T15:36:46.962 [01K5S13TQ7Y29T2V0R06YTDQM5] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+[file] saved at 1758555405733: {
+  "id": "01K5S13ZD51CX7FX9BN1APVZWG",
+  "ts_utc": 1758555405733,
+  "monitor": "file",
+  "action": "saved",
+  "subject_type": "file",
+  "subject_id": "01K4QY12KSYGDD6T7E50K42R4H",
+  "session_id": "01K5S13TXZKADVTQ73EP0QWESB",
+  "batch_id": null,
+  "pid": null,
+  "exe_name": null,
+  "exe_path_hash": null,
+  "window_title_hash": null,
+  "url_hash": null,
+  "file_path_hash": null,
+  "attrs_json": "{\"op\":\"watchdog\",\"src\":\"FileWatchEventHandler\",\"moved_from\":false}"
+}
+[file] deleted at 1758555405769: {
+  "id": "01K5S13ZE9QJ3XX7WZVNDGNWHH",
+  "ts_utc": 1758555405769,
+  "monitor": "file",
+  "action": "deleted",
+  "subject_type": "file",
+  "subject_id": "01K4QY12P3RY8564MQTK3NYXWG",
+  "session_id": "01K5S13TXZKADVTQ73EP0QWESB",
+  "batch_id": null,
+  "pid": null,
+  "exe_name": null,
+  "exe_path_hash": null,
+  "window_title_hash": null,
+  "url_hash": null,
+  "file_path_hash": null,
+  "attrs_json": "{\"op\":\"watchdog\",\"src\":\"FileWatchEventHandler\",\"moved_from\":false}"
+}
+[file] renamed at 1758555405799: {
+  "id": "01K5S13ZF75F76GPN361DGNQDT",
+  "ts_utc": 1758555405799,
+  "monitor": "file",
+  "action": "renamed",
+  "subject_type": "file",
+  "subject_id": "01K4QY12P3RY8564MQTK3NYXWG",
+  "session_id": "01K5S13TXZKADVTQ73EP0QWESB",
+  "batch_id": null,
+  "pid": null,
+  "exe_name": null,
+  "exe_path_hash": null,
+  "window_title_hash": null,
+  "url_hash": null,
+  "file_path_hash": null,
+  "attrs_json": "{\"op\":\"watchdog\",\"src\":\"FileWatchEventHandler\",\"moved_from\":true,\"old_path_hash\":\"2f2cd874ca07574634e85759c2882c89b7a1c553e3c915df4422b4a3157ef205\"}"
+}
+[file] saved at 1758555406654: {
+  "id": "01K5S1409YQFSRMPKSBV549T9V",
+  "ts_utc": 1758555406654,
+  "monitor": "file",
+  "action": "saved",
+  "subject_type": "file",
+  "subject_id": "01K4QY0GWFWECG4D3GXPTP9HKF",
+  "session_id": "01K5S13TXZKADVTQ73EP0QWESB",
+  "batch_id": null,
+  "pid": null,
+  "exe_name": null,
+  "exe_path_hash": null,
+  "window_title_hash": null,
+  "url_hash": null,
+  "file_path_hash": null,
+  "attrs_json": "{\"op\":\"watchdog\",\"src\":\"FileWatchEventHandler\",\"moved_from\":false}"
+}
+[file] saved at 1758555406715: {
+  "id": "01K5S140BVT4XBT95CWK2ACFFK",
+  "ts_utc": 1758555406715,
+  "monitor": "file",
+  "action": "saved",
+  "subject_type": "file",
+  "subject_id": "01K4QY16D1QND7XDF101FGVBZQ",
+  "session_id": "01K5S13TXZKADVTQ73EP0QWESB",
+  "batch_id": null,
+  "pid": null,
+  "exe_name": null,
+  "exe_path_hash": null,
+  "window_title_hash": null,
+  "url_hash": null,
+  "file_path_hash": null,
+  "attrs_json": "{\"op\":\"watchdog\",\"src\":\"FileWatchEventHandler\",\"moved_from\":false}"
+}
+[file] saved at 1758555406749: {
+  "id": "01K5S140CXDJPGKW14CJY8D5V7",
+  "ts_utc": 1758555406749,
+  "monitor": "file",
+  "action": "saved",
+  "subject_type": "file",
+  "subject_id": "01K4QY16EPC72QXP5X10CB51YM",
+  "session_id": "01K5S13TXZKADVTQ73EP0QWESB",
+  "batch_id": null,
+  "pid": null,
+  "exe_name": null,
+  "exe_path_hash": null,
+  "window_title_hash": null,
+  "url_hash": null,
+  "file_path_hash": null,
+  "attrs_json": "{\"op\":\"watchdog\",\"src\":\"FileWatchEventHandler\",\"moved_from\":false}"
+}
+[file] saved at 1758555406845: {
+  "id": "01K5S140FXMS3K6JAHW7PAZMDB",
+  "ts_utc": 1758555406845,
+  "monitor": "file",
+  "action": "saved",
+  "subject_type": "file",
+  "subject_id": "01K4QY16D1QND7XDF101FGVBZQ",
+  "session_id": "01K5S13TXZKADVTQ73EP0QWESB",
+  "batch_id": null,
+  "pid": null,
+  "exe_name": null,
+  "exe_path_hash": null,
+  "window_title_hash": null,
+  "url_hash": null,
+  "file_path_hash": null,
+  "attrs_json": "{\"op\":\"watchdog\",\"src\":\"FileWatchEventHandler\",\"moved_from\":false}"
+}
+[file] saved at 1758555406876: {
+  "id": "01K5S140GW9B30Z54S582ZGWNJ",
+  "ts_utc": 1758555406876,
+  "monitor": "file",
+  "action": "saved",
+  "subject_type": "file",
+  "subject_id": "01K4QY07CWTEQ16HXDCKF408VZ",
+  "session_id": "01K5S13TXZKADVTQ73EP0QWESB",
+  "batch_id": null,
+  "pid": null,
+  "exe_name": null,
+  "exe_path_hash": null,
+  "window_title_hash": null,
+  "url_hash": null,
+  "file_path_hash": null,
+  "attrs_json": "{\"op\":\"watchdog\",\"src\":\"FileWatchEventHandler\",\"moved_from\":false}"
+}
+[file] saved at 1758555406915: {
+  "id": "01K5S140J30N4D8MV63JPQP1GG",
+  "ts_utc": 1758555406915,
+  "monitor": "file",
+  "action": "saved",
+  "subject_type": "file",
+  "subject_id": "01K4QY07E0YV8R71NPPD9W0THC",
+  "session_id": "01K5S13TXZKADVTQ73EP0QWESB",
+  "batch_id": null,
+  "pid": null,
+  "exe_name": null,
+  "exe_path_hash": null,
+  "window_title_hash": null,
+  "url_hash": null,
+  "file_path_hash": null,
+  "attrs_json": "{\"op\":\"watchdog\",\"src\":\"FileWatchEventHandler\",\"moved_from\":false}"
+}
+[file] saved at 1758555406941: {
+  "id": "01K5S140JXBW6Z8G9QG4GX7V82",
+  "ts_utc": 1758555406941,
+  "monitor": "file",
+  "action": "saved",
+  "subject_type": "file",
+  "subject_id": "01K4QY07CWTEQ16HXDCKF408VZ",
+  "session_id": "01K5S13TXZKADVTQ73EP0QWESB",
+  "batch_id": null,
+  "pid": null,
+  "exe_name": null,
+  "exe_path_hash": null,
+  "window_title_hash": null,
+  "url_hash": null,
+  "file_path_hash": null,
+  "attrs_json": "{\"op\":\"watchdog\",\"src\":\"FileWatchEventHandler\",\"moved_from\":false}"
+}
+[file] saved at 1758555406971: {
+  "id": "01K5S140KVR62AQ22NCXW14WQH",
+  "ts_utc": 1758555406971,
+  "monitor": "file",
+  "action": "saved",
+  "subject_type": "file",
+  "subject_id": "01K5S140KJ7GXKC02B7HVHYCTK",
+  "session_id": "01K5S13TXZKADVTQ73EP0QWESB",
+  "batch_id": null,
+  "pid": null,
+  "exe_name": null,
+  "exe_path_hash": null,
+  "window_title_hash": null,
+  "url_hash": null,
+  "file_path_hash": null,
+  "attrs_json": "{\"op\":\"watchdog\",\"src\":\"FileWatchEventHandler\",\"moved_from\":false}"
+}
+2025-09-22T15:36:47.686 [01K5S13TQ7Y29T2V0R06YTDQM5] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T15:36:47.732 [01K5S13TQ7Y29T2V0R06YTDQM5] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T15:36:47.777 [01K5S13TQ7Y29T2V0R06YTDQM5] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T15:36:47.818 [01K5S13TQ7Y29T2V0R06YTDQM5] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T15:36:47.867 [01K5S13TQ7Y29T2V0R06YTDQM5] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T15:36:47.906 [01K5S13TQ7Y29T2V0R06YTDQM5] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T15:36:47.944 [01K5S13TQ7Y29T2V0R06YTDQM5] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T15:36:47.994 [01K5S13TQ7Y29T2V0R06YTDQM5] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T15:36:48.028 [01K5S13TQ7Y29T2V0R06YTDQM5] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T15:36:48.060 [01K5S13TQ7Y29T2V0R06YTDQM5] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T15:36:48.094 [01K5S13TQ7Y29T2V0R06YTDQM5] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T15:36:48.128 [01K5S13TQ7Y29T2V0R06YTDQM5] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+[file] created at 1758555407716: {
+  "id": "01K5S141B43J4H8BXQBVDPYTQ2",
+  "ts_utc": 1758555407716,
+  "monitor": "file",
+  "action": "created",
+  "subject_type": "file",
+  "subject_id": "01K5S13W9267H12A9G1HND4WAA",
+  "session_id": "01K5S13TXZKADVTQ73EP0QWESB",
+  "batch_id": null,
+  "pid": null,
+  "exe_name": null,
+  "exe_path_hash": null,
+  "window_title_hash": null,
+  "url_hash": null,
+  "file_path_hash": null,
+  "attrs_json": "{\"op\":\"watchdog\",\"src\":\"FileWatchEventHandler\",\"moved_from\":false}"
+}
+[file] saved at 1758555407765: {
+  "id": "01K5S141CN50AB7C9FSZBN1YCJ",
+  "ts_utc": 1758555407765,
+  "monitor": "file",
+  "action": "saved",
+  "subject_type": "file",
+  "subject_id": "01K5S13W9267H12A9G1HND4WAA",
+  "session_id": "01K5S13TXZKADVTQ73EP0QWESB",
+  "batch_id": null,
+  "pid": null,
+  "exe_name": null,
+  "exe_path_hash": null,
+  "window_title_hash": null,
+  "url_hash": null,
+  "file_path_hash": null,
+  "attrs_json": "{\"op\":\"watchdog\",\"src\":\"FileWatchEventHandler\",\"moved_from\":false}"
+}
+[file] created at 1758555407795: {
+  "id": "01K5S141DKZ5RPPNR1Q3V9TNXE",
+  "ts_utc": 1758555407795,
+  "monitor": "file",
+  "action": "created",
+  "subject_type": "file",
+  "subject_id": "01K5S13WD7FGMDV7XJ9B0ZYEX6",
+  "session_id": "01K5S13TXZKADVTQ73EP0QWESB",
+  "batch_id": null,
+  "pid": null,
+  "exe_name": null,
+  "exe_path_hash": null,
+  "window_title_hash": null,
+  "url_hash": null,
+  "file_path_hash": null,
+  "attrs_json": "{\"op\":\"watchdog\",\"src\":\"FileWatchEventHandler\",\"moved_from\":false}"
+}
+[file] saved at 1758555407858: {
+  "id": "01K5S141FJ0V2BTEEMXGPQHB52",
+  "ts_utc": 1758555407858,
+  "monitor": "file",
+  "action": "saved",
+  "subject_type": "file",
+  "subject_id": "01K5S13WFPHJRX2ZYTD9TEJHV7",
+  "session_id": "01K5S13TXZKADVTQ73EP0QWESB",
+  "batch_id": null,
+  "pid": null,
+  "exe_name": null,
+  "exe_path_hash": null,
+  "window_title_hash": null,
+  "url_hash": null,
+  "file_path_hash": null,
+  "attrs_json": "{\"op\":\"watchdog\",\"src\":\"FileWatchEventHandler\",\"moved_from\":false}"
+}
+[file] saved at 1758555407890: {
+  "id": "01K5S141GJ1NM362SC7MW2GQ9S",
+  "ts_utc": 1758555407890,
+  "monitor": "file",
+  "action": "saved",
+  "subject_type": "file",
+  "subject_id": "01K5S13W9267H12A9G1HND4WAA",
+  "session_id": "01K5S13TXZKADVTQ73EP0QWESB",
+  "batch_id": null,
+  "pid": null,
+  "exe_name": null,
+  "exe_path_hash": null,
+  "window_title_hash": null,
+  "url_hash": null,
+  "file_path_hash": null,
+  "attrs_json": "{\"op\":\"watchdog\",\"src\":\"FileWatchEventHandler\",\"moved_from\":false}"
+}
+[file] saved at 1758555407922: {
+  "id": "01K5S141HJVMPK8RF5246S2XQJ",
+  "ts_utc": 1758555407922,
+  "monitor": "file",
+  "action": "saved",
+  "subject_type": "file",
+  "subject_id": "01K5S13WFPHJRX2ZYTD9TEJHV7",
+  "session_id": "01K5S13TXZKADVTQ73EP0QWESB",
+  "batch_id": null,
+  "pid": null,
+  "exe_name": null,
+  "exe_path_hash": null,
+  "window_title_hash": null,
+  "url_hash": null,
+  "file_path_hash": null,
+  "attrs_json": "{\"op\":\"watchdog\",\"src\":\"FileWatchEventHandler\",\"moved_from\":false}"
+}
+[file] saved at 1758555407969: {
+  "id": "01K5S141K1P11VEBCGZMPABQQN",
+  "ts_utc": 1758555407969,
+  "monitor": "file",
+  "action": "saved",
+  "subject_type": "file",
+  "subject_id": "01K5S13W9267H12A9G1HND4WAA",
+  "session_id": "01K5S13TXZKADVTQ73EP0QWESB",
+  "batch_id": null,
+  "pid": null,
+  "exe_name": null,
+  "exe_path_hash": null,
+  "window_title_hash": null,
+  "url_hash": null,
+  "file_path_hash": null,
+  "attrs_json": "{\"op\":\"watchdog\",\"src\":\"FileWatchEventHandler\",\"moved_from\":false}"
+}
+[file] saved at 1758555408001: {
+  "id": "01K5S141M1MHSRHEZ417XXNCFD",
+  "ts_utc": 1758555408001,
+  "monitor": "file",
+  "action": "saved",
+  "subject_type": "file",
+  "subject_id": "01K5S13WHTC15K7VFP7E2J9HS6",
+  "session_id": "01K5S13TXZKADVTQ73EP0QWESB",
+  "batch_id": null,
+  "pid": null,
+  "exe_name": null,
+  "exe_path_hash": null,
+  "window_title_hash": null,
+  "url_hash": null,
+  "file_path_hash": null,
+  "attrs_json": "{\"op\":\"watchdog\",\"src\":\"FileWatchEventHandler\",\"moved_from\":false}"
+}
+[file] saved at 1758555408048: {
+  "id": "01K5S141NG087BEXMY7CAEHV45",
+  "ts_utc": 1758555408048,
+  "monitor": "file",
+  "action": "saved",
+  "subject_type": "file",
+  "subject_id": "01K5S13W9267H12A9G1HND4WAA",
+  "session_id": "01K5S13TXZKADVTQ73EP0QWESB",
+  "batch_id": null,
+  "pid": null,
+  "exe_name": null,
+  "exe_path_hash": null,
+  "window_title_hash": null,
+  "url_hash": null,
+  "file_path_hash": null,
+  "attrs_json": "{\"op\":\"watchdog\",\"src\":\"FileWatchEventHandler\",\"moved_from\":false}"
+}
+[file] deleted at 1758555408080: {
+  "id": "01K5S141PG3QGTR57J3CQ3PJDM",
+  "ts_utc": 1758555408080,
+  "monitor": "file",
+  "action": "deleted",
+  "subject_type": "file",
+  "subject_id": "01K5S13W9267H12A9G1HND4WAA",
+  "session_id": "01K5S13TXZKADVTQ73EP0QWESB",
+  "batch_id": null,
+  "pid": null,
+  "exe_name": null,
+  "exe_path_hash": null,
+  "window_title_hash": null,
+  "url_hash": null,
+  "file_path_hash": null,
+  "attrs_json": "{\"op\":\"watchdog\",\"src\":\"FileWatchEventHandler\",\"moved_from\":false}"
+}
+[file] deleted at 1758555408112: {
+  "id": "01K5S141QGQE0GCTTXDVJYYS27",
+  "ts_utc": 1758555408112,
+  "monitor": "file",
+  "action": "deleted",
+  "subject_type": "file",
+  "subject_id": "01K5S13WD7FGMDV7XJ9B0ZYEX6",
+  "session_id": "01K5S13TXZKADVTQ73EP0QWESB",
+  "batch_id": null,
+  "pid": null,
+  "exe_name": null,
+  "exe_path_hash": null,
+  "window_title_hash": null,
+  "url_hash": null,
+  "file_path_hash": null,
+  "attrs_json": "{\"op\":\"watchdog\",\"src\":\"FileWatchEventHandler\",\"moved_from\":false}"
+}
+[file] saved at 1758555408144: {
+  "id": "01K5S141RGEHCK0JDXEBJ7MQ20",
+  "ts_utc": 1758555408144,
+  "monitor": "file",
+  "action": "saved",
+  "subject_type": "file",
+  "subject_id": "01K4QY07CWTEQ16HXDCKF408VZ",
+  "session_id": "01K5S13TXZKADVTQ73EP0QWESB",
+  "batch_id": null,
+  "pid": null,
+  "exe_name": null,
+  "exe_path_hash": null,
+  "window_title_hash": null,
+  "url_hash": null,
+  "file_path_hash": null,
+  "attrs_json": "{\"op\":\"watchdog\",\"src\":\"FileWatchEventHandler\",\"moved_from\":false}"
+}
+2025-09-22T15:36:50.028 [01K5S13TQ7Y29T2V0R06YTDQM5] [database] [Thread-5] INFO - Database initialized at lb_data\local.db
+2025-09-22T15:36:50.298 [01K5S13TQ7Y29T2V0R06YTDQM5] [monitor] [Monitor-heartbeat] INFO - Reached total beats limit (10)
+2025-09-22T15:36:50.298 [01K5S13TQ7Y29T2V0R06YTDQM5] [monitor] [Monitor-heartbeat] INFO - Stopping heartbeat monitor after 10 beats
+2025-09-22T15:36:50.687 [01K5S13TQ7Y29T2V0R06YTDQM5] [supervisor] [MainThread] INFO - Heartbeat monitor finished, shutting down naturally
+2025-09-22T15:36:50.687 [01K5S13TQ7Y29T2V0R06YTDQM5] [browser] [Monitor-browser] INFO - Browser monitoring stopped
+2025-09-22T15:36:50.687 [01K5S13TQ7Y29T2V0R06YTDQM5] [monitor] [MainThread] INFO - Stopped monitor browser
+2025-09-22T15:36:51.041 [01K5S13TQ7Y29T2V0R06YTDQM5] [file] [Monitor-file] INFO - File system monitoring stopped
+[file] saved at 1758555411041: {
+  "id": "01K5S144K1BQQZ34ADP6M0GH53",
+  "ts_utc": 1758555411041,
+  "monitor": "file",
+  "action": "saved",
+  "subject_type": "file",
+  "subject_id": "01K4QY0NCYM00RV3V8PQ5TSPC6",
+  "session_id": "01K5S13TXZKADVTQ73EP0QWESB",
+  "batch_id": null,
+  "pid": null,
+  "exe_name": null,
+  "exe_path_hash": null,
+  "window_title_hash": null,
+  "url_hash": null,
+  "file_path_hash": null,
+  "attrs_json": "{\"op\":\"watchdog\",\"src\":\"FileWatchEventHandler\",\"moved_from\":false}"
+}
+2025-09-22T15:36:51.041 [01K5S13TQ7Y29T2V0R06YTDQM5] [monitor] [MainThread] INFO - Stopped monitor file
+2025-09-22T15:36:51.041 [01K5S13TQ7Y29T2V0R06YTDQM5] [monitor] [Monitor-active_window] INFO - Active window monitoring stopped
+[active_window] window_change at 1758555401316: {
+  "id": "01K5S13V347K7RQAWBX90ZWFF9",
+  "ts_utc": 1758555401316,
+  "monitor": "active_window",
+  "action": "window_change",
+  "subject_type": "window",
+  "subject_id": "01K5S13V0494ABJE4HXVXEDJKS",
+  "session_id": "01K5S13TXX069WK9BTY6GP66F6",
+  "batch_id": null,
+  "pid": 24324,
+  "exe_name": "WindowsTerminal.exe",
+  "exe_path_hash": "ea66d1c75c57f68b4a16c95d9eeb9787b65f3fcac462846b3ee9b81501a51840",
+  "window_title_hash": "55f6b564b0a565c44c1ec1e7fcbd8e1beb2b352041ef229ac1f1092327885cad",
+  "url_hash": null,
+  "file_path_hash": null,
+  "attrs_json": "{\"source\":\"win32+poll\",\"hwnd\":2557592,\"app_id\":\"01K4NVSEZPR4BSRZYJKX5HWZ7T\"}"
+}
+2025-09-22T15:36:51.041 [01K5S13TQ7Y29T2V0R06YTDQM5] [monitor] [MainThread] INFO - Stopped monitor active_window
+2025-09-22T15:36:51.041 [01K5S13TQ7Y29T2V0R06YTDQM5] [mouse] [Monitor-mouse] INFO - Mouse monitoring stopped
+2025-09-22T15:36:51.041 [01K5S13TQ7Y29T2V0R06YTDQM5] [monitor] [MainThread] INFO - Stopped monitor mouse
+2025-09-22T15:36:51.041 [01K5S13TQ7Y29T2V0R06YTDQM5] [keyboard] [Monitor-keyboard] INFO - Keyboard monitoring stopped
+2025-09-22T15:36:51.041 [01K5S13TQ7Y29T2V0R06YTDQM5] [monitor] [MainThread] INFO - Stopped monitor keyboard
+2025-09-22T15:36:51.041 [01K5S13TQ7Y29T2V0R06YTDQM5] [context_snapshot] [Monitor-context_snapshot] INFO - Context snapshot monitoring stopped
+[context_snapshot] snapshot at 1758555408270: {
+  "id": "01K5S141WEFYGBEKZG3TNCF73S",
+  "ts_utc": 1758555408270,
+  "monitor": "context_snapshot",
+  "action": "snapshot",
+  "subject_type": "none",
+  "subject_id": null,
+  "session_id": "01K5S13TX2Q71Z2T7T8KKQ5ZD1",
+  "batch_id": null,
+  "pid": null,
+  "exe_name": null,
+  "exe_path_hash": null,
+  "window_title_hash": null,
+  "url_hash": null,
+  "file_path_hash": null,
+  "attrs_json": "{\"kb_down\":0,\"kb_up\":0,\"mouse_moves\":0,\"mouse_clicks\":0,\"mouse_scroll\":0,\"since_ms\":7093,\"last_event_monitor\":null}"
+}
+2025-09-22T15:36:51.041 [01K5S13TQ7Y29T2V0R06YTDQM5] [monitor] [MainThread] INFO - Stopped monitor context_snapshot
+Monitoring stopped

@@ -8,33 +8,36 @@ from urllib.parse import urlparse
 from .config import get_effective_config
 
 
-def hash_str(value: str, purpose: Literal["window_title", "file_path", "url", "exe_path", "free_text"]) -> str:
+def hash_str(
+    value: str,
+    purpose: Literal["window_title", "file_path", "url", "exe_path", "free_text"],
+) -> str:
     """Generate purpose-scoped salted SHA-256 hash of a string.
-    
+
     Uses the formula: H = sha256(salt_bytes || purpose || 0x00 || utf8(value))
-    
+
     Args:
         value: The string to hash (no plaintext logging)
         purpose: The purpose domain for hash separation
-    
+
     Returns:
         Hex SHA-256 digest string
     """
     config = get_effective_config()
-    
+
     # Get salt as bytes from hex
     salt_hex = config.hashing.salt
     salt_bytes = bytes.fromhex(salt_hex)
-    
+
     # Create hasher
     hasher = hashlib.sha256()
-    
+
     # Add components: salt_bytes || purpose || 0x00 || utf8(value)
     hasher.update(salt_bytes)
     hasher.update(purpose.encode("utf-8"))
     hasher.update(b"\x00")
     hasher.update(value.encode("utf-8"))
-    
+
     return hasher.hexdigest()
 
 
@@ -88,14 +91,14 @@ def verify_hash(
 
 def extract_domain(url: str) -> str:
     """Extract domain from URL for hashing.
-    
+
     Returns the netloc (hostname:port) from the URL.
-    This is a simplified approach - a full eTLD+1 implementation 
+    This is a simplified approach - a full eTLD+1 implementation
     would require a public suffix list.
-    
+
     Args:
         url: The URL to extract domain from
-        
+
     Returns:
         Domain string or empty string if parsing fails
     """

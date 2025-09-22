@@ -4,7 +4,7 @@ import subprocess
 import sys
 
 
-def test_cli_help_exit_code():
+def test_cli_help_exit_code() -> None:
     """Test that lb3 --help returns exit code 0."""
     result = subprocess.run(
         [sys.executable, "-m", "lb3", "--help"],
@@ -18,7 +18,7 @@ def test_cli_help_exit_code():
     assert "System monitoring daemon and CLI" in result.stdout
 
 
-def test_console_script_help_exit_code():
+def test_console_script_help_exit_code() -> None:
     """Test that lb3 console script --help returns exit code 0."""
     result = subprocess.run(
         ["lb3", "--help"], capture_output=True, text=True, timeout=30
@@ -29,7 +29,7 @@ def test_console_script_help_exit_code():
     assert "System monitoring daemon and CLI" in result.stdout
 
 
-def test_cli_version_command():
+def test_cli_version_command() -> None:
     """Test that version command works."""
     result = subprocess.run(
         ["lb3", "version"], capture_output=True, text=True, timeout=30
@@ -40,7 +40,7 @@ def test_cli_version_command():
     assert "3.0.0-dev" in result.stdout
 
 
-def test_cli_daemon_command():
+def test_cli_daemon_command() -> None:
     """Test that daemon command placeholder works."""
     result = subprocess.run(
         ["lb3", "daemon", "status"], capture_output=True, text=True, timeout=30

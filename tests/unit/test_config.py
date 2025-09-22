@@ -15,7 +15,7 @@ class TestConfig:
     def test_default_config_values(self):
         """Test that default configuration has all required keys."""
         config = Config()
-        
+
         assert config.time_zone_handling == "UTC_store_only"
         assert config.storage.sqlite_path == "./lb_data/local.db"
         assert config.storage.spool_dir == "./lb_data/spool"
@@ -33,7 +33,7 @@ class TestConfig:
     def test_salt_generation(self):
         """Test that salt is generated and is hex string."""
         config = Config()
-        
+
         assert config.hashing.salt is not None
         assert isinstance(config.hashing.salt, str)
         assert len(config.hashing.salt) == 64  # 32 bytes as hex
@@ -44,25 +44,27 @@ class TestConfig:
         """Test that salt persists across config loads."""
         with tempfile.TemporaryDirectory() as temp_dir:
             config_path = Path(temp_dir) / "config.yaml"
-            
+
             # First load - creates config
             config1 = load_config(config_path)
             original_salt = config1.hashing.salt
-            
+
             # Second load - should reuse same salt
             config2 = load_config(config_path)
             assert config2.hashing.salt == original_salt
 
     def test_guardrails_enforcement(self):
         """Test that guardrails.no_global_text_keylogging cannot be disabled."""
-        with pytest.raises(ValueError, match="guardrails.no_global_text_keylogging must be True"):
+        with pytest.raises(
+            ValueError, match="guardrails.no_global_text_keylogging must be True"
+        ):
             Config(guardrails={"no_global_text_keylogging": False})
 
     def test_yaml_serialization(self):
         """Test config can be serialized to/from YAML."""
         config = Config()
         yaml_str = config.to_yaml()
-        
+
         # Parse YAML to verify structure
         data = yaml.safe_load(yaml_str)
         assert data["time_zone_handling"] == "UTC_store_only"
@@ -73,14 +75,14 @@ class TestConfig:
         """Test that config file is created on first load."""
         with tempfile.TemporaryDirectory() as temp_dir:
             config_path = Path(temp_dir) / "config.yaml"
-            
+
             # File should not exist initially
             assert not config_path.exists()
-            
+
             # Loading should create the file
-            config = load_config(config_path)
+            load_config(config_path)
             assert config_path.exists()
-            
+
             # File should contain valid YAML
             with open(config_path) as f:
                 data = yaml.safe_load(f)
@@ -90,47 +92,45 @@ class TestConfig:
         """Test loading config from existing file."""
         with tempfile.TemporaryDirectory() as temp_dir:
             config_path = Path(temp_dir) / "config.yaml"
-            
+
             # Create config file with custom values
             custom_config = {
                 "time_zone_handling": "UTC_store_only",
                 "storage": {
                     "sqlite_path": "./custom/path.db",
-                    "spool_dir": "./custom/spool"
+                    "spool_dir": "./custom/spool",
                 },
-                "hashing": {
-                    "salt": "abc123" * 10  # Custom salt
-                },
+                "hashing": {"salt": "abc123" * 10},  # Custom salt
                 "identifiers": {"type": "ULID"},
                 "guardrails": {"no_global_text_keylogging": True},
                 "plugins": {"enabled": ["test_plugin"]},
                 "browser": {
                     "integration": {
                         "disabled_by_default": False,
-                        "chrome_remote_debug_port": 9222
+                        "chrome_remote_debug_port": 9222,
                     }
                 },
                 "heartbeat": {
                     "poll_intervals": {
                         "active_window": "2.0s",
                         "browser": "5.0s",
-                        "context_idle_gap": "10.0s"
+                        "context_idle_gap": "10.0s",
                     }
                 },
                 "batch": {
                     "flush_thresholds": {
                         "keyboard_events": "256 or 2.0s",
-                        "mouse_events": "128 or 2.0s"
+                        "mouse_events": "128 or 2.0s",
                     }
-                }
+                },
             }
-            
-            with open(config_path, 'w') as f:
+
+            with open(config_path, "w") as f:
                 yaml.dump(custom_config, f)
-            
+
             # Load config
             config = load_config(config_path)
-            
+
             # Verify custom values were loaded
             assert config.storage.sqlite_path == "./custom/path.db"
             assert config.storage.spool_dir == "./custom/spool"
@@ -143,7 +143,7 @@ class TestConfig:
     def test_config_path_resolution(self):
         """Test that config path resolves correctly."""
         config_path = Config.get_config_path()
-        
+
         assert config_path.is_absolute()
         assert config_path.name == "config.yaml"
         assert "lb_data" in str(config_path)
@@ -152,24 +152,24 @@ class TestConfig:
         """Test that ensure_data_dirs creates necessary directories."""
         with tempfile.TemporaryDirectory() as temp_dir:
             # Change to temp directory context
-            original_cwd = Path.cwd()
+            Path.cwd()
             temp_path = Path(temp_dir)
-            
+
             try:
                 # Create config in temp context
                 config = Config()
                 config.storage.spool_dir = str(temp_path / "test_spool")
-                
+
                 # Directories should not exist yet
-                lb_data = temp_path / "lb_data"
+                temp_path / "lb_data"
                 spool_dir = temp_path / "test_spool"
-                
+
                 config.ensure_data_dirs()
-                
+
                 # Spool directory should be created
                 assert spool_dir.exists()
                 assert spool_dir.is_dir()
-                
+
             finally:
                 # Restore working directory
                 pass
