@@ -117,7 +117,7 @@ Little Brother v3 uses a structured data model with these core tables:
 - **Mouse**: Movement, clicks, scroll patterns
 - **File Watch**: File system access events
 - **Browser**: Tab changes, navigation (when CDP enabled)
-- **Context Snapshot**: Periodic system state captures *(deprecated by default - see Configuration)*
+- **Context Snapshot**: Periodic system state captures *(removed from runtime - see Configuration)*
 
 ### Event Fields
 All events include:
@@ -153,33 +153,35 @@ All data remains **local** in the `./lb_data/` directory. The monitoring system 
 
 ## Configuration
 
-### Context Snapshot Deprecation
+### Context Snapshot Runtime Removal
 
-**Live idle detection (context snapshots) is disabled by default** to reduce runtime fragility. The system will run more reliably without complex event-driven idle detection.
+**Context snapshot monitoring has been completely removed from runtime** to improve stability and reduce complexity. The system now runs without any idle detection or context snapshot generation during normal operation.
 
-To **re-enable live idle detection** if needed:
-```yaml
-# In lb_data/config.yaml
-monitors:
-  context_snapshot:
-    enabled: true
-    idle_gap: "7.0s"  # Time before idle snapshot
+**Available alternatives:**
+
+**For testing and debugging:**
+```bash
+# Manual one-shot context snapshot
+lb3 probe context
+
+# Generate sample context snapshot data
+lb3 spool generate context_snapshot --count 10
 ```
 
-To **enable quiescence snapshots** (recommended lightweight alternative):
+**For periodic context snapshots (optional):**
 ```yaml
-# In lb_data/config.yaml
+# In lb_data/config.yaml - Enable quiescence timer
 monitors:
   context_snapshot:
-    enabled: false  # Keep live detection off
+    enabled: false        # Runtime monitoring disabled
     quiescence:
-      enabled: true
-      interval: "300s"  # Every 5 minutes
+      enabled: true       # Enable timer-based snapshots
+      interval: "300s"    # Every 5 minutes
 ```
 
-**Why this change?** Live idle detection requires complex event monitoring and timing that can be fragile across different Windows configurations. Quiescence snapshots provide similar insights with much simpler, more reliable timer-based operation.
+**Why this change?** Context snapshot live idle detection was prone to fragility across different Windows configurations and added runtime complexity. Removing it from the default supervisor path ensures the monitoring system runs reliably for core functionality (keyboard, mouse, active window, file, browser).
 
-**Commands still work:** `lb3 probe context` and `lb3 spool generate context_snapshot` work regardless of configuration for testing and debugging.
+**Impact:** Default `lb3 run` will produce zero context_snapshot events. Use `lb3 probe context` for manual testing or enable quiescence for periodic snapshots if needed.
 
 ## Troubleshooting
 

@@ -20,7 +20,8 @@
       "Bash(dir:*)",
       "Bash(timeout 12 python -m lb3 run)",
       "Bash(echo \"Exit code: $?\")",
-      "Bash(timeout:*)"
+      "Bash(timeout:*)",
+      "Bash(git rev-parse:*)"
     ],
     "deny": [],
     "ask": []

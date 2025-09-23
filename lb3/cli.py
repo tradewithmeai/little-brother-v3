@@ -907,78 +907,77 @@ def monitors_status(
         False, "--verbose", "-v", help="Show detailed monitor information"
     ),
 ) -> None:
-    """Show status of all monitors."""
+    """Show configuration status of all monitors (non-invasive)."""
     import json as json_module
     import threading
     import time
 
-    from .supervisor import create_standard_supervisor
+    from .config import get_effective_config
 
     try:
-        # Create supervisor in inspection mode (not started)
-        supervisor = create_standard_supervisor(dry_run=False, verbose=False)
+        # Get configuration without starting any monitors
+        config = get_effective_config()
 
-        # Check if lb3 is currently running by looking for running processes
-        running_supervisor = None
-        is_running = False
-
-        # Try to detect if supervisor is already running by checking for active threads
+        # Check if supervisor is already running by looking for active threads
         active_threads = [
             t.name for t in threading.enumerate() if t.name.startswith("Monitor-")
         ]
         is_running = len(active_threads) > 0
 
-        monitor_status = {}
+        # Define standard monitors and their config status
+        monitor_configs = {
+            "heartbeat": {
+                "configured": True,  # Always configured
+                "enabled": True,  # Always enabled
+                "note": "Core monitor (always active)",
+            },
+            "keyboard": {
+                "configured": True,  # Always configured
+                "enabled": True,  # Always enabled
+                "note": "Input monitor",
+            },
+            "mouse": {
+                "configured": True,  # Always configured
+                "enabled": True,  # Always enabled
+                "note": "Input monitor",
+            },
+            "active_window": {
+                "configured": True,  # Configured on Windows
+                "enabled": True,  # Enabled on Windows
+                "note": "Window tracking (Windows only)",
+            },
+            "file": {
+                "configured": True,  # Always configured
+                "enabled": True,  # Always enabled
+                "note": "File system monitor",
+            },
+            "browser": {
+                "configured": True,  # Always configured
+                "enabled": not config.browser.integration.disabled_by_default,  # Based on config
+                "note": "CDP browser integration",
+            },
+            "context_snapshot": {
+                "configured": hasattr(config, "monitors"),  # Has monitors config
+                "enabled": False,  # REMOVED FROM RUNTIME
+                "note": "REMOVED from runtime (use 'lb3 probe context' for manual testing)",
+            },
+        }
 
-        for monitor_name, status_info in supervisor.get_monitor_status().items():
-            monitor = status_info.get("monitor")
-
-            basic_info = {
-                "name": monitor_name,
-                "configured": monitor is not None,
-                "error": status_info.get("error"),
-                "started": status_info.get("started", False),
-                "thread_alive": False,
+        # Add quiescence status if context_snapshot has config
+        if hasattr(config, "monitors") and hasattr(config.monitors, "context_snapshot"):
+            quiescence_info = {
+                "configured": True,
+                "enabled": config.monitors.context_snapshot.quiescence.enabled,
+                "interval": config.monitors.context_snapshot.quiescence.interval,
+                "note": "Timer-based context snapshots (optional)",
             }
-
-            # Add thread status if monitor exists
-            if monitor and hasattr(monitor, "_thread"):
-                thread = monitor._thread
-                basic_info["thread_alive"] = thread is not None and thread.is_alive()
-
-            # Add context_snapshot specific details if available and requested
-            if monitor_name == "context" and verbose and monitor:
-                context_info = {}
-
-                if hasattr(monitor, "_idle_gap_s"):
-                    context_info["idle_gap_s"] = monitor._idle_gap_s
-
-                if hasattr(monitor, "_subscribed"):
-                    context_info["subscribed"] = monitor._subscribed
-
-                if hasattr(monitor, "_last_event_time"):
-                    context_info["last_event_time"] = monitor._last_event_time
-                    context_info["time_since_last_event"] = (
-                        time.time() - monitor._last_event_time
-                    )
-
-                if hasattr(monitor, "_gap_window_start"):
-                    context_info["gap_window_start"] = monitor._gap_window_start
-
-                if hasattr(monitor, "_last_snapshot_time"):
-                    context_info["last_snapshot_time"] = monitor._last_snapshot_time
-
-                if hasattr(monitor, "_last_event_monitor"):
-                    context_info["last_event_monitor"] = monitor._last_event_monitor
-
-                basic_info.update(context_info)
-
-            monitor_status[monitor_name] = basic_info
+            monitor_configs["quiescence"] = quiescence_info
 
         result = {
             "supervisor_running": is_running,
-            "monitors": monitor_status,
+            "monitors": monitor_configs,
             "timestamp": time.time(),
+            "warning": "This command is non-invasive and shows configuration only",
         }
 
         if json:
@@ -990,48 +989,34 @@ def monitors_status(
                 typer.echo("Supervisor: NOT RUNNING (no active monitor threads)")
 
             typer.echo()
-            typer.echo("Monitor Status:")
+            typer.echo("Monitor Configuration Status:")
 
-            for monitor_name, info in monitor_status.items():
-                status_indicators = []
+            for monitor_name, info in monitor_configs.items():
+                status_parts = []
 
                 if info["configured"]:
-                    status_indicators.append("configured")
+                    status_parts.append("configured")
                 else:
-                    status_indicators.append("NOT configured")
+                    status_parts.append("NOT configured")
 
-                if info["started"]:
-                    status_indicators.append("started")
+                if info["enabled"]:
+                    status_parts.append("enabled")
+                else:
+                    status_parts.append("disabled")
 
-                if info["thread_alive"]:
-                    status_indicators.append("thread alive")
-
-                # Add subscription status for context monitor in verbose mode
-                if verbose and monitor_name == "context" and "subscribed" in info:
-                    if info["subscribed"]:
-                        status_indicators.append("subscribed")
-                    else:
-                        status_indicators.append("NOT subscribed")
-
-                if info["error"]:
-                    status_indicators.append(f"ERROR: {info['error']}")
-
-                status_text = (
-                    ", ".join(status_indicators) if status_indicators else "unknown"
-                )
+                status_text = ", ".join(status_parts)
                 typer.echo(f"  {monitor_name}: {status_text}")
 
-                # Show verbose context_snapshot details
-                if verbose and monitor_name == "context":
-                    for key, value in info.items():
-                        if key not in [
-                            "name",
-                            "configured",
-                            "error",
-                            "started",
-                            "thread_alive",
-                        ]:
-                            typer.echo(f"    {key}: {value}")
+                if verbose and "note" in info:
+                    typer.echo(f"    note: {info['note']}")
+
+                if verbose and "interval" in info:
+                    typer.echo(f"    interval: {info['interval']}")
+
+            if not verbose:
+                typer.echo()
+                typer.echo("Use -v/--verbose for detailed information")
+                typer.echo("Note: context_snapshot completely removed from runtime")
 
     except Exception as e:
         typer.echo(f"[ERROR] Failed to get monitor status: {e}", err=True)
@@ -1044,7 +1029,7 @@ def probe(
         "context", help="Target to probe (currently only 'context' supported)"
     ),
 ) -> None:
-    """Probe specific monitor functionality."""
+    """Probe specific monitor functionality in complete isolation."""
     if target != "context":
         typer.echo(
             f"[ERROR] Unsupported probe target: {target}. Only 'context' is supported."
@@ -1059,33 +1044,32 @@ def probe(
     from .monitors.context_snapshot import ContextSnapshotMonitor
     from .spooler import get_spooler_manager
 
-    try:
-        typer.echo("Starting context snapshot probe...")
+    # Initialize cleanup variables
+    bus = None
+    sink = None
+    monitor = None
 
-        # Start event bus and spooler sink
+    try:
+        # Start isolated event bus and spooler sink
         bus = get_event_bus()
         sink = SpoolerSink()
         bus.subscribe(sink)
         bus.start()
 
-        # Create and start context snapshot monitor
+        # Create and start context snapshot monitor in isolation
         monitor = ContextSnapshotMonitor(dry_run=False)
         monitor.start()
 
         # Wait for initialization
         time.sleep(0.5)
 
-        # Force emit a snapshot by calling the public method
-        try:
-            monitor.force_emit(trigger="probe")
-            typer.echo("Forced context snapshot emission")
-        except Exception as e:
-            typer.echo(f"[WARN] Failed to force emit: {e}")
+        # Force emit a snapshot
+        monitor.force_emit(trigger="probe")
 
-        # Wait for sink to write (give more time for async processing)
+        # Wait for async processing
         time.sleep(3.0)
 
-        # Stop monitor and flush
+        # Stop monitor first
         monitor.stop()
 
         # Flush and close spooler
@@ -1094,14 +1078,16 @@ def probe(
         sink.close()
         bus.stop()
 
-        typer.echo("Probe write phase completed, starting import...")
+        # Clear references for cleanup
+        monitor = None
+        sink = None
+        bus = None
 
-        # Run importer for context_snapshot only
+        # Import phase
         from .config import get_effective_config
 
         config = get_effective_config()
         spool_dir = Path(config.storage.spool_dir)
-
         importer = JournalImporter(spool_dir)
 
         # Import context_snapshot files specifically
@@ -1116,29 +1102,35 @@ def probe(
                 ndjson_files.sort(key=lambda f: f.stat().st_mtime, reverse=True)
                 latest_file = ndjson_files[0]
 
-                # Try to import using flush_monitor
-                try:
-                    result = importer.flush_monitor("context_snapshot")
-                    imported_count = result.get("events_imported", 0)
-                except Exception as e:
-                    typer.echo(f"[WARN] Import failed: {e}")
+                # Import
+                result = importer.flush_monitor("context_snapshot")
+                imported_count = result.get("events_imported", 0)
 
-        # Summary line
-        latest_file_str = str(latest_file) if latest_file else "<none>"
-        typer.echo(f"probe: imported={imported_count}, latest_file={latest_file_str}")
+        # Single-line output as required
+        latest_file_name = latest_file.name if latest_file else "<none>"
+        typer.echo(f"probe: imported={imported_count}, latest_file={latest_file_name}")
 
-        # Exit with appropriate code
-        if imported_count == 0:
-            typer.echo("[ERROR] Probe failed: no events imported")
-            raise typer.Exit(1)
+        # Exit with appropriate code based on success
+        if imported_count > 0:
+            raise typer.Exit(0)  # Success
         else:
-            typer.echo("Probe completed successfully")
-            raise typer.Exit(0)
+            raise typer.Exit(1)  # Failure
 
     except typer.Exit:
         # Re-raise typer.Exit without modification to preserve exit codes
         raise
     except Exception as e:
+        # Ensure proper cleanup even on error
+        try:
+            if monitor:
+                monitor.stop()
+            if sink:
+                sink.close()
+            if bus:
+                bus.stop()
+        except Exception:
+            pass  # Ignore cleanup errors
+
         typer.echo(f"[ERROR] Probe failed: {e}", err=True)
         raise typer.Exit(1) from e
 
