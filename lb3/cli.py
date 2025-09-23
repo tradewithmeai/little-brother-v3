@@ -23,6 +23,10 @@ app.add_typer(db_app, name="db")
 spool_app = typer.Typer(help="Journal spool management commands")
 app.add_typer(spool_app, name="spool")
 
+# Monitors command group
+monitors_app = typer.Typer(help="Monitor management and diagnostics commands")
+app.add_typer(monitors_app, name="monitors")
+
 
 @app.command()
 def version() -> None:
@@ -893,6 +897,283 @@ def spool_generate(
 
     except Exception as e:
         typer.echo(f"[ERROR] Sample generation failed: {e}", err=True)
+        raise typer.Exit(1) from e
+
+
+@monitors_app.command("status")
+def monitors_status(
+    json: bool = typer.Option(False, "--json", help="Output in JSON format"),
+    verbose: bool = typer.Option(
+        False, "--verbose", "-v", help="Show detailed monitor information"
+    ),
+) -> None:
+    """Show status of all monitors."""
+    import json as json_module
+    import threading
+    import time
+
+    from .supervisor import create_standard_supervisor
+
+    try:
+        # Create supervisor in inspection mode (not started)
+        supervisor = create_standard_supervisor(dry_run=False, verbose=False)
+
+        # Check if lb3 is currently running by looking for running processes
+        running_supervisor = None
+        is_running = False
+
+        # Try to detect if supervisor is already running by checking for active threads
+        active_threads = [
+            t.name for t in threading.enumerate() if t.name.startswith("Monitor-")
+        ]
+        is_running = len(active_threads) > 0
+
+        monitor_status = {}
+
+        for monitor_name, status_info in supervisor.get_monitor_status().items():
+            monitor = status_info.get("monitor")
+
+            basic_info = {
+                "name": monitor_name,
+                "configured": monitor is not None,
+                "error": status_info.get("error"),
+                "started": status_info.get("started", False),
+                "thread_alive": False,
+            }
+
+            # Add thread status if monitor exists
+            if monitor and hasattr(monitor, "_thread"):
+                thread = monitor._thread
+                basic_info["thread_alive"] = thread is not None and thread.is_alive()
+
+            # Add context_snapshot specific details if available and requested
+            if monitor_name == "context" and verbose and monitor:
+                context_info = {}
+
+                if hasattr(monitor, "_idle_gap_s"):
+                    context_info["idle_gap_s"] = monitor._idle_gap_s
+
+                if hasattr(monitor, "_subscribed"):
+                    context_info["subscribed"] = monitor._subscribed
+
+                if hasattr(monitor, "_last_event_time"):
+                    context_info["last_event_time"] = monitor._last_event_time
+                    context_info["time_since_last_event"] = (
+                        time.time() - monitor._last_event_time
+                    )
+
+                if hasattr(monitor, "_gap_window_start"):
+                    context_info["gap_window_start"] = monitor._gap_window_start
+
+                if hasattr(monitor, "_last_snapshot_time"):
+                    context_info["last_snapshot_time"] = monitor._last_snapshot_time
+
+                if hasattr(monitor, "_last_event_monitor"):
+                    context_info["last_event_monitor"] = monitor._last_event_monitor
+
+                basic_info.update(context_info)
+
+            monitor_status[monitor_name] = basic_info
+
+        result = {
+            "supervisor_running": is_running,
+            "monitors": monitor_status,
+            "timestamp": time.time(),
+        }
+
+        if json:
+            typer.echo(json_module.dumps(result, indent=2))
+        else:
+            if is_running:
+                typer.echo("Supervisor: RUNNING")
+            else:
+                typer.echo("Supervisor: NOT RUNNING")
+
+            typer.echo()
+            typer.echo("Monitor Status:")
+
+            for monitor_name, info in monitor_status.items():
+                status_indicators = []
+
+                if info["configured"]:
+                    status_indicators.append("configured")
+                else:
+                    status_indicators.append("NOT configured")
+
+                if info["started"]:
+                    status_indicators.append("started")
+
+                if info["thread_alive"]:
+                    status_indicators.append("thread alive")
+
+                if info["error"]:
+                    status_indicators.append(f"ERROR: {info['error']}")
+
+                status_text = (
+                    ", ".join(status_indicators) if status_indicators else "unknown"
+                )
+                typer.echo(f"  {monitor_name}: {status_text}")
+
+                # Show verbose context_snapshot details
+                if verbose and monitor_name == "context":
+                    for key, value in info.items():
+                        if key not in [
+                            "name",
+                            "configured",
+                            "error",
+                            "started",
+                            "thread_alive",
+                        ]:
+                            typer.echo(f"    {key}: {value}")
+
+    except Exception as e:
+        typer.echo(f"[ERROR] Failed to get monitor status: {e}", err=True)
+        raise typer.Exit(1) from e
+
+
+@app.command()
+def probe(
+    target: str = typer.Argument(
+        "context", help="Target to probe (currently only 'context' supported)"
+    ),
+) -> None:
+    """Probe specific monitor functionality."""
+    if target != "context":
+        typer.echo(
+            f"[ERROR] Unsupported probe target: {target}. Only 'context' is supported."
+        )
+        raise typer.Exit(1)
+
+    import time
+    from pathlib import Path
+
+    from .events import SpoolerSink, get_event_bus
+    from .importer import JournalImporter
+    from .monitors.context_snapshot import ContextSnapshotMonitor
+    from .spooler import get_spooler_manager
+
+    try:
+        typer.echo("Starting context snapshot probe...")
+
+        # Start event bus and spooler sink
+        bus = get_event_bus()
+        sink = SpoolerSink()
+        bus.subscribe(sink)
+        bus.start()
+
+        # Create and start context snapshot monitor
+        monitor = ContextSnapshotMonitor(dry_run=False)
+        monitor.start()
+
+        # Wait for initialization
+        time.sleep(0.5)
+
+        # Force emit a snapshot by calling the public method
+        try:
+            monitor.force_emit(trigger="probe")
+            typer.echo("Forced context snapshot emission")
+        except Exception as e:
+            typer.echo(f"[WARN] Failed to force emit: {e}")
+
+        # Wait for sink to write (give more time for async processing)
+        time.sleep(3.0)
+
+        # Stop monitor and flush
+        monitor.stop()
+
+        # Flush and close spooler
+        spooler_manager = get_spooler_manager()
+        spooler_manager.flush_idle_spoolers()
+        sink.close()
+        bus.stop()
+
+        typer.echo("Probe write phase completed, starting import...")
+
+        # Run importer for context_snapshot only
+        from .config import get_effective_config
+
+        config = get_effective_config()
+        spool_dir = Path(config.storage.spool_dir)
+
+        importer = JournalImporter(spool_dir)
+
+        # Import context_snapshot files specifically
+        context_spool = spool_dir / "context_snapshot"
+        imported_count = 0
+        latest_file = None
+
+        if context_spool.exists():
+            ndjson_files = list(context_spool.glob("*.ndjson.gz"))
+            if ndjson_files:
+                # Sort by modification time, get latest
+                ndjson_files.sort(key=lambda f: f.stat().st_mtime, reverse=True)
+                latest_file = ndjson_files[0]
+
+                # Try to import using flush_monitor
+                try:
+                    result = importer.flush_monitor("context_snapshot")
+                    imported_count = result.get("events_imported", 0)
+                except Exception as e:
+                    typer.echo(f"[WARN] Import failed: {e}")
+
+        # Summary line
+        latest_file_str = str(latest_file) if latest_file else "<none>"
+        typer.echo(f"probe: imported={imported_count}, latest_file={latest_file_str}")
+
+        # Exit with appropriate code
+        if imported_count == 0:
+            raise typer.Exit(1)
+        else:
+            raise typer.Exit(0)
+
+    except Exception as e:
+        typer.echo(f"[ERROR] Probe failed: {e}", err=True)
+        raise typer.Exit(1) from e
+
+
+@spool_app.command()
+def stats(
+    reset: bool = typer.Option(
+        False, "--reset", help="Reset counters after displaying"
+    ),
+) -> None:
+    """Show spooler write and finalization statistics."""
+
+    from .spooler import get_spooler_manager
+
+    try:
+        manager = get_spooler_manager()
+
+        if reset:
+            stats_data = manager.reset_stats()
+            typer.echo("Spooler stats (before reset):")
+        else:
+            stats_data = manager.get_stats()
+            typer.echo("Current spooler stats:")
+
+        # Display written events
+        written = stats_data.get("written_by_monitor", {})
+        if written:
+            typer.echo("\nEvents written by monitor:")
+            for monitor, count in sorted(written.items()):
+                typer.echo(f"  {monitor}: {count}")
+        else:
+            typer.echo("\nNo events written yet")
+
+        # Display finalized files
+        finalized = stats_data.get("finalised_files_by_monitor", {})
+        if finalized:
+            typer.echo("\nFiles finalized by monitor:")
+            for monitor, count in sorted(finalized.items()):
+                typer.echo(f"  {monitor}: {count}")
+        else:
+            typer.echo("\nNo files finalized yet")
+
+        if reset:
+            typer.echo("\nCounters have been reset to zero.")
+
+    except Exception as e:
+        typer.echo(f"[ERROR] Failed to get spooler stats: {e}", err=True)
         raise typer.Exit(1) from e
 
 

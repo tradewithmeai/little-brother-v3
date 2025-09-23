@@ -8,7 +8,7 @@ import threading
 import time
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any, Callable, Optional
 
 from .config import get_effective_config
 from .logging_setup import get_logger
@@ -27,12 +27,18 @@ except ImportError:
 class JournalSpooler:
     """Atomic append-only NDJSON.gz spooler with rollover."""
 
-    def __init__(self, monitor: str, spool_dir: Optional[Path] = None):
+    def __init__(
+        self,
+        monitor: str,
+        spool_dir: Optional[Path] = None,
+        finalize_callback: Optional[Callable[[str], None]] = None,
+    ):
         """Initialize spooler for a monitor.
 
         Args:
             monitor: Monitor name (e.g., 'active_window', 'keyboard')
             spool_dir: Base spool directory. If None, uses config.
+            finalize_callback: Optional callback to call when files are finalized
         """
         self.monitor = monitor
 
@@ -50,7 +56,8 @@ class JournalSpooler:
 
         # State tracking
         self._lock = threading.Lock()
-        self._current_file: Optional[gzip.GzipFile] = None
+        self._current_gzip: Optional[gzip.GzipFile] = None
+        self._current_file_handle: Optional[Any] = None
         self._current_path: Optional[Path] = None
         self._current_temp_path: Optional[Path] = None
         self._current_hour: Optional[str] = None
@@ -64,6 +71,9 @@ class JournalSpooler:
         self._buffer_size_bytes = 0
         self._max_buffer_size = self.max_size_bytes * 2  # 2x batch size buffer
         self._quota_manager = get_quota_manager()
+
+        # Finalization callback
+        self._finalize_callback = finalize_callback
 
     def write_event(self, event_data: dict[str, Any]) -> None:
         """Write an event to the journal with quota backpressure.
@@ -110,7 +120,7 @@ class JournalSpooler:
             current_hour = self._get_current_hour()
             hour_changed = self._current_hour != current_hour
             size_exceeded = (
-                self._current_file is not None
+                self._current_gzip is not None
                 and self._uncompressed_size + event_size > self.max_size_bytes
             )
 
@@ -118,12 +128,13 @@ class JournalSpooler:
                 self._rollover(hour_changed)
 
             # Open file if needed
-            if self._current_file is None:
+            if self._current_gzip is None:
                 self._open_current_file()
 
-            # Write to file
-            self._current_file.write(json_bytes)
-            self._uncompressed_size += event_size
+            # Write to file (add newline for NDJSON format)
+            json_line = json_bytes + b"\n"
+            self._current_gzip.write(json_line)
+            self._uncompressed_size += len(json_line)
             self._last_write_time = time.time()
 
     def flush_if_idle(self) -> None:
@@ -133,7 +144,7 @@ class JournalSpooler:
             self._flush_memory_buffer()
 
             if (
-                self._current_file is not None
+                self._current_gzip is not None
                 and time.time() - self._last_write_time >= self.idle_timeout
             ):
                 self._close_current_file()
@@ -153,7 +164,7 @@ class JournalSpooler:
         return now.strftime("%Y%m%d-%H")
 
     def _open_current_file(self) -> None:
-        """Open current journal file for writing."""
+        """Open current journal file for writing in proper binary mode."""
         self._current_hour = self._get_current_hour()
 
         # Generate filename with sequence if needed to avoid collisions
@@ -165,46 +176,48 @@ class JournalSpooler:
         self._current_path = self.spool_dir / filename
         self._current_temp_path = self.spool_dir / f"{filename}.part"
 
-        # Check if we're resuming an existing .part file
-        existing_size = 0
+        # Always start fresh - do not attempt to append to gzip files
+        # If a .part file exists, it's likely corrupted, so we start over
         if self._current_temp_path.exists():
-            # If resuming, read existing content to track size
             try:
-                with gzip.open(
-                    str(self._current_temp_path), "rt", encoding="utf-8"
-                ) as f:
-                    content = f.read()
-                    existing_size = len(content.encode("utf-8"))
-            except Exception:
-                existing_size = 0
+                self._current_temp_path.unlink()
+                logger.debug(f"Removed existing .part file: {self._current_temp_path}")
+            except Exception as e:
+                logger.warning(f"Could not remove existing .part file: {e}")
 
-        # Open gzip file in append mode with temp name
-        self._current_file = gzip.open(
-            str(self._current_temp_path),
-            "ab",  # append binary mode
-            compresslevel=6,
+        # Open file in binary mode with no buffering for immediate writes
+        self._current_file_handle = open(self._current_temp_path, "wb", buffering=0)
+
+        # Wrap with gzip in binary write mode
+        self._current_gzip = gzip.GzipFile(
+            fileobj=self._current_file_handle, mode="wb", compresslevel=6
         )
 
-        self._uncompressed_size = existing_size
-        logger.debug(
-            f"Opened journal file: {self._current_temp_path} (existing size: {existing_size})"
-        )
+        self._uncompressed_size = 0
+        logger.debug(f"Opened new journal file: {self._current_temp_path}")
 
     def _close_current_file(self) -> None:
         """Close and atomically rename current journal file."""
-        if self._current_file is None:
+        if self._current_gzip is None and self._current_file_handle is None:
             return
 
         try:
-            # Flush and fsync
-            self._current_file.flush()
+            # Flush and fsync gzip data first
+            if self._current_gzip:
+                self._current_gzip.flush()
 
-            # Get file descriptor for fsync
-            fd = self._current_file.fileobj.fileno()
-            os.fsync(fd)
+            # Flush and fsync underlying file handle
+            if self._current_file_handle:
+                self._current_file_handle.flush()
+                fd = self._current_file_handle.fileno()
+                os.fsync(fd)
 
-            # Close file
-            self._current_file.close()
+            # Close in proper order: gzip wrapper first, then file handle
+            if self._current_gzip:
+                self._current_gzip.close()
+
+            if self._current_file_handle:
+                self._current_file_handle.close()
 
             # Atomic rename
             if self._current_temp_path and self._current_path:
@@ -219,7 +232,33 @@ class JournalSpooler:
                     # Directory fsync not supported on all Windows versions
                     pass
 
-                logger.debug(f"Finalized journal file: {self._current_path}")
+                # Post-promotion sanity check: verify gzip file is readable
+                try:
+                    with gzip.open(self._current_path, "rb") as f:
+                        f.read(8)  # Read first 8 bytes to verify gzip integrity
+                    logger.debug(f"Finalized journal file: {self._current_path}")
+                except Exception as gzip_error:
+                    # Move corrupted file to .part.error and log
+                    error_path = self._current_path.with_suffix(
+                        self._current_path.suffix + ".part.error"
+                    )
+                    try:
+                        os.replace(str(self._current_path), str(error_path))
+                        logger.error(
+                            f"Gzip sanity check failed for {self.monitor}/{self._current_path.name}: {gzip_error}"
+                        )
+                    except Exception as move_error:
+                        logger.error(
+                            f"Failed to move corrupted file {self._current_path}: {move_error}"
+                        )
+                    return  # Don't call finalize callback for corrupted files
+
+                # Notify manager of finalization
+                if self._finalize_callback:
+                    try:
+                        self._finalize_callback(self.monitor)
+                    except Exception as callback_error:
+                        logger.error(f"Error in finalize callback: {callback_error}")
 
         except Exception as e:
             logger.error(f"Error closing journal file: {e}")
@@ -229,7 +268,8 @@ class JournalSpooler:
                     self._current_temp_path.unlink()
 
         finally:
-            self._current_file = None
+            self._current_gzip = None
+            self._current_file_handle = None
             self._current_path = None
             self._current_temp_path = None
             self._current_hour = None
@@ -279,17 +319,19 @@ class JournalSpooler:
             try:
                 # Check if we need to rollover
                 if (
-                    self._current_file is not None
+                    self._current_gzip is not None
                     and self._uncompressed_size + len(json_bytes) > self.max_size_bytes
                 ):
                     self._rollover()
 
                 # Open file if needed
-                if self._current_file is None:
+                if self._current_gzip is None:
                     self._open_current_file()
 
-                # Write buffered event
-                self._current_file.write(json_bytes)
+                # Write buffered event (ensure it has newline for NDJSON format)
+                if not json_bytes.endswith(b"\n"):
+                    json_bytes += b"\n"
+                self._current_gzip.write(json_bytes)
                 self._uncompressed_size += len(json_bytes)
 
             except Exception as e:
@@ -327,6 +369,11 @@ class SpoolerManager:
         self._spoolers: dict[str, JournalSpooler] = {}
         self._lock = threading.Lock()
 
+        # Event counters for observability
+        self._written_by_monitor: dict[str, int] = {}
+        self._finalised_files_by_monitor: dict[str, int] = {}
+        self._counters_lock = threading.Lock()
+
     def get_spooler(self, monitor: str) -> JournalSpooler:
         """Get or create spooler for a monitor.
 
@@ -338,7 +385,9 @@ class SpoolerManager:
         """
         with self._lock:
             if monitor not in self._spoolers:
-                self._spoolers[monitor] = JournalSpooler(monitor, self.spool_dir)
+                self._spoolers[monitor] = JournalSpooler(
+                    monitor, self.spool_dir, finalize_callback=self._on_file_finalized
+                )
             return self._spoolers[monitor]
 
     def write_event(self, monitor: str, event_data: dict[str, Any]) -> None:
@@ -350,6 +399,12 @@ class SpoolerManager:
         """
         spooler = self.get_spooler(monitor)
         spooler.write_event(event_data)
+
+        # Increment write counter
+        with self._counters_lock:
+            self._written_by_monitor[monitor] = (
+                self._written_by_monitor.get(monitor, 0) + 1
+            )
 
     def flush_idle_spoolers(self) -> None:
         """Flush all idle spoolers."""
@@ -369,6 +424,40 @@ class SpoolerManager:
                 except Exception as e:
                     logger.error(f"Error closing spooler: {e}")
             self._spoolers.clear()
+
+    def _on_file_finalized(self, monitor: str) -> None:
+        """Callback when a file is finalized."""
+        with self._counters_lock:
+            self._finalised_files_by_monitor[monitor] = (
+                self._finalised_files_by_monitor.get(monitor, 0) + 1
+            )
+
+    def get_stats(self) -> dict[str, dict[str, int]]:
+        """Get spooler statistics.
+
+        Returns:
+            Dictionary with 'written_by_monitor' and 'finalised_files_by_monitor' keys
+        """
+        with self._counters_lock:
+            return {
+                "written_by_monitor": self._written_by_monitor.copy(),
+                "finalised_files_by_monitor": self._finalised_files_by_monitor.copy(),
+            }
+
+    def reset_stats(self) -> dict[str, dict[str, int]]:
+        """Get current stats and reset all counters.
+
+        Returns:
+            Dictionary with stats before reset
+        """
+        with self._counters_lock:
+            current_stats = {
+                "written_by_monitor": self._written_by_monitor.copy(),
+                "finalised_files_by_monitor": self._finalised_files_by_monitor.copy(),
+            }
+            self._written_by_monitor.clear()
+            self._finalised_files_by_monitor.clear()
+            return current_stats
 
 
 # Global spooler manager

@@ -206,6 +206,7 @@ class SpoolerSink:
         from .spooler import get_spooler_manager
 
         self.spooler_manager = get_spooler_manager()
+        self._closed = False
 
     def __call__(self, event: Event) -> None:
         """Handle an event by writing to spooler.
@@ -218,6 +219,26 @@ class SpoolerSink:
             self.spooler_manager.write_event(event.monitor, event_dict)
         except Exception as e:
             logger.error(f"Failed to write event to spooler: {e}")
+
+    def close(self) -> None:
+        """Close spooler sink and finalize all open segments."""
+        if self._closed:
+            return
+
+        try:
+            # Flush idle spoolers to finalize .part files
+            self.spooler_manager.flush_idle_spoolers()
+        except Exception as e:
+            logger.error(f"Error flushing idle spoolers during close: {e}")
+
+        try:
+            # Close all spoolers to ensure proper cleanup
+            self.spooler_manager.close_all()
+        except Exception as e:
+            logger.error(f"Error closing spoolers during close: {e}")
+
+        self._closed = True
+        logger.debug("SpoolerSink closed")
 
 
 # Global event bus instance

@@ -7,7 +7,17 @@
       "Bash(git commit:*)",
       "Bash(rm:*)",
       "Bash(gh repo create:*)",
-      "Bash(git push:*)"
+      "Bash(git push:*)",
+      "Bash(pytest:*)",
+      "Bash(python:*)",
+      "Bash(timeout 15 python -m lb3 run:*)",
+      "Bash(timeout 25 python:*)",
+      "Bash(timeout 5 python:*)",
+      "Bash(ruff check:*)",
+      "Bash(mypy:*)",
+      "Bash(set LB_DEBUG_SNAPSHOTS=1)",
+      "Bash(zcat:*)",
+      "Bash(dir:*)"
     ],
     "deny": [],
     "ask": []

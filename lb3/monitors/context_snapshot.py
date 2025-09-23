@@ -1,8 +1,10 @@
 """Context snapshot monitor for Little Brother v3."""
 
+import os
 import threading
 import time
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Optional
 
 from ..config import get_effective_config
@@ -215,6 +217,7 @@ class ContextSnapshotMonitor(MonitorBase):
 
     def _emit_snapshot(self, trigger: str) -> None:
         """Emit a context snapshot event."""
+        logger.info(f"_emit_snapshot called with trigger: {trigger}")
         try:
             current_time = time.time()
             int(current_time * 1000)
@@ -243,6 +246,9 @@ class ContextSnapshotMonitor(MonitorBase):
                 "attrs": attrs,
             }
 
+            # Write debug breadcrumb if enabled
+            self._write_debug_breadcrumb(trigger, current_time)
+
             # Emit the event
             self.emit(event_data)
 
@@ -255,3 +261,39 @@ class ContextSnapshotMonitor(MonitorBase):
 
         except Exception as e:
             logger.error(f"Error emitting snapshot: {e}")
+
+    def _write_debug_breadcrumb(self, trigger: str, timestamp: float) -> None:
+        """Write debug breadcrumb if LB_DEBUG_SNAPSHOTS=1."""
+        try:
+            # Only write if debug flag is set
+            if os.environ.get("LB_DEBUG_SNAPSHOTS") != "1":
+                return
+
+            # Create debug directory if it doesn't exist
+            debug_dir = Path("lb_data/debug")
+            debug_dir.mkdir(parents=True, exist_ok=True)
+
+            # Prepare breadcrumb line (tab-separated)
+            unix_ts = int(timestamp)
+            last_monitor = self._last_event_monitor or "none"
+            breadcrumb_line = (
+                f"{unix_ts}\ttrigger={trigger}\tlast_event_monitor={last_monitor}\n"
+            )
+
+            # Append to breadcrumbs file
+            breadcrumb_file = debug_dir / "context_snapshot_breadcrumbs.log"
+            with open(breadcrumb_file, "a", encoding="utf-8") as f:
+                f.write(breadcrumb_line)
+
+        except Exception as e:
+            # Don't let breadcrumb writing break snapshot emission
+            logger.debug(f"Failed to write debug breadcrumb: {e}")
+
+    def force_emit(self, trigger: str = "manual") -> None:
+        """Publicly accessible method to force a snapshot emission."""
+        logger.info(f"force_emit called with trigger: {trigger}")
+        try:
+            self._emit_snapshot(trigger=trigger)
+            logger.info("force_emit completed successfully")
+        except Exception as e:
+            logger.error(f"force_emit failed: {e}")

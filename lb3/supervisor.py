@@ -2,6 +2,7 @@
 
 import signal
 import sys
+import threading
 import time
 
 from .events import SpoolerSink, get_event_bus
@@ -31,8 +32,60 @@ class MonitorSupervisor:
         # Track monitor status
         self._monitor_status: dict[str, dict] = {}
 
+        # Flush thread management
+        self._flush_thread = None
+        self._flush_stop_event = threading.Event()
+
         # Set up signal handlers for graceful shutdown
         self._setup_signal_handlers()
+
+    def _start_flush_thread(self) -> None:
+        """Start periodic flush thread for spooler maintenance."""
+        if self._flush_thread is not None:
+            return
+
+        self._flush_stop_event.clear()
+        self._flush_thread = threading.Thread(
+            target=self._flush_loop, name="SpoolerFlush", daemon=True
+        )
+        self._flush_thread.start()
+
+        if self.verbose:
+            logger.info("Started periodic flush thread")
+
+    def _flush_loop(self) -> None:
+        """Periodic flush loop that runs every second."""
+        from .spooler import get_spooler_manager
+
+        while not self._flush_stop_event.is_set() and self._running:
+            try:
+                spooler_manager = get_spooler_manager()
+                spooler_manager.flush_idle_spoolers()
+            except Exception as e:
+                logger.debug(f"Error in periodic flush: {e}")
+
+            # Wait 1 second or until stop is requested
+            self._flush_stop_event.wait(1.0)
+
+        if self.verbose:
+            logger.info("Periodic flush thread stopped")
+
+    def _stop_flush_thread(self) -> None:
+        """Stop the periodic flush thread."""
+        if self._flush_thread is None:
+            return
+
+        self._flush_stop_event.set()
+
+        if self._flush_thread.is_alive():
+            self._flush_thread.join(timeout=2.0)
+            if self._flush_thread.is_alive():
+                logger.warning("Flush thread did not stop gracefully")
+
+        self._flush_thread = None
+
+        if self.verbose:
+            logger.info("Stopped periodic flush thread")
 
     def _setup_signal_handlers(self):
         """Set up signal handlers for graceful shutdown."""
@@ -126,6 +179,9 @@ class MonitorSupervisor:
                 self._spooler_sink = SpoolerSink()
                 self._event_bus.subscribe(self._spooler_sink)
 
+                # Start periodic flush thread
+                self._start_flush_thread()
+
                 if self.verbose:
                     logger.info("Started event bus and spooler sink")
             except Exception as e:
@@ -194,7 +250,14 @@ class MonitorSupervisor:
         # Wait for monitor threads to finish with timeout
         self._wait_for_threads(timeout_seconds)
 
-        # Stop event system
+        # Stop flush thread first
+        if not self.dry_run:
+            try:
+                self._stop_flush_thread()
+            except Exception as e:
+                logger.warning(f"Error stopping flush thread: {e}")
+
+        # Close spooler sink to flush and finalize files
         if self._spooler_sink:
             try:
                 self._spooler_sink.close()
@@ -203,6 +266,10 @@ class MonitorSupervisor:
             except Exception as e:
                 logger.warning(f"Error closing spooler sink: {e}")
 
+            # Check for remaining .part files after close
+            self._check_remaining_part_files()
+
+        # Stop event bus last
         if self._event_bus:
             try:
                 self._event_bus.stop()
@@ -293,6 +360,40 @@ class MonitorSupervisor:
     def is_running(self) -> bool:
         """Check if supervisor is running."""
         return self._running
+
+    def _check_remaining_part_files(self) -> None:
+        """Check for remaining .part files after shutdown and warn if found."""
+        try:
+            from pathlib import Path
+
+            from .config import get_effective_config
+
+            config = get_effective_config()
+            spool_dir = Path(config.storage.spool_dir)
+
+            if not spool_dir.exists():
+                return
+
+            # Find all .part files
+            part_files = []
+            for monitor_dir in spool_dir.iterdir():
+                if monitor_dir.is_dir():
+                    for part_file in monitor_dir.glob("*.part"):
+                        part_files.append((monitor_dir.name, part_file))
+
+            if part_files:
+                monitor_files = {}
+                for monitor, file_path in part_files:
+                    if monitor not in monitor_files:
+                        monitor_files[monitor] = []
+                    monitor_files[monitor].append(file_path.name)
+
+                logger.warning("Found remaining .part files after shutdown:")
+                for monitor, files in monitor_files.items():
+                    logger.warning(f"  {monitor}: {', '.join(files)}")
+
+        except Exception as e:
+            logger.debug(f"Error checking for remaining .part files: {e}")
 
 
 def create_standard_supervisor(
