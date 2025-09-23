@@ -18,7 +18,9 @@
       "Bash(set LB_DEBUG_SNAPSHOTS=1)",
       "Bash(zcat:*)",
       "Bash(dir:*)",
-      "Bash(timeout 12 python -m lb3 run)"
+      "Bash(timeout 12 python -m lb3 run)",
+      "Bash(echo \"Exit code: $?\")",
+      "Bash(timeout:*)"
     ],
     "deny": [],
     "ask": []

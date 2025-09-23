@@ -99,6 +99,29 @@ class LoggingConfig(BaseModel):
     quota_log_interval_s: int = 60
 
 
+class QuiescenceConfig(BaseModel):
+    """Quiescence snapshot configuration."""
+
+    enabled: bool = False
+    interval: str = "300s"
+
+
+class ContextSnapshotConfig(BaseModel):
+    """Context snapshot monitor configuration."""
+
+    enabled: bool = False  # Disabled by default
+    idle_gap: str = "7.0s"
+    quiescence: QuiescenceConfig = Field(default_factory=QuiescenceConfig)
+
+
+class MonitorsConfig(BaseModel):
+    """Monitor configurations."""
+
+    context_snapshot: ContextSnapshotConfig = Field(
+        default_factory=ContextSnapshotConfig
+    )
+
+
 class Config(BaseModel):
     """Main configuration class."""
 
@@ -112,6 +135,7 @@ class Config(BaseModel):
     heartbeat: HeartbeatConfig = Field(default_factory=HeartbeatConfig)
     batch: BatchConfig = Field(default_factory=BatchConfig)
     logging: LoggingConfig = Field(default_factory=LoggingConfig)
+    monitors: MonitorsConfig = Field(default_factory=MonitorsConfig)
 
     @validator("guardrails")
     def validate_guardrails(cls, v):

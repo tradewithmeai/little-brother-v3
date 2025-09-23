@@ -5,6 +5,7 @@ import sys
 import threading
 import time
 
+from .config import get_effective_config
 from .events import SpoolerSink, get_event_bus
 from .logging_setup import get_logger
 
@@ -35,6 +36,9 @@ class MonitorSupervisor:
         # Flush thread management
         self._flush_thread = None
         self._flush_stop_event = threading.Event()
+
+        # Quiescence scheduler management
+        self._quiescence_scheduler = None
 
         # Set up signal handlers for graceful shutdown
         self._setup_signal_handlers()
@@ -250,6 +254,15 @@ class MonitorSupervisor:
         # Wait for monitor threads to finish with timeout
         self._wait_for_threads(timeout_seconds)
 
+        # Stop quiescence scheduler if running
+        if self._quiescence_scheduler:
+            try:
+                self._quiescence_scheduler.stop()
+                if self.verbose:
+                    logger.info("Stopped quiescence scheduler")
+            except Exception as e:
+                logger.warning(f"Error stopping quiescence scheduler: {e}")
+
         # Stop flush thread first
         if not self.dry_run:
             try:
@@ -425,8 +438,41 @@ def create_standard_supervisor(
         HeartbeatMonitor, "heartbeat", interval=1.0, total_beats=heartbeat_beats
     )
 
-    # Context snapshot monitor
-    supervisor.add_monitor(ContextSnapshotMonitor, "context")
+    # Context snapshot monitor (conditional based on config)
+    config = get_effective_config()
+    context_enabled = (
+        hasattr(config, "monitors") and config.monitors.context_snapshot.enabled
+    )
+    quiescence_enabled = (
+        hasattr(config, "monitors")
+        and config.monitors.context_snapshot.quiescence.enabled
+    )
+
+    context_monitor = None
+    if context_enabled:
+        context_monitor = supervisor.add_monitor(ContextSnapshotMonitor, "context")
+        logger.info("Context snapshot monitor enabled (live idle detection)")
+    else:
+        logger.info(
+            "Context snapshot monitor disabled by default (use monitors.context_snapshot.enabled: true to enable)"
+        )
+
+    # Quiescence scheduler (conditional and requires context monitor functionality)
+    if quiescence_enabled:
+        from .quiescence_scheduler import QuiescenceScheduler
+
+        # Create a context monitor instance for quiescence if none exists
+        if context_monitor is None:
+            context_monitor_instance = ContextSnapshotMonitor(dry_run=dry_run)
+            # Start the monitor's spooling but not the event subscription
+            context_monitor_instance.start()
+        else:
+            context_monitor_instance = context_monitor
+
+        scheduler = QuiescenceScheduler(context_monitor_instance)
+        supervisor._quiescence_scheduler = scheduler  # Store reference for cleanup
+        scheduler.start()
+        logger.info("Quiescence scheduler enabled")
 
     # Input monitors (may fail on some systems)
     supervisor.add_monitor(KeyboardMonitor, "keyboard")

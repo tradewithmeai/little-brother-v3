@@ -117,7 +117,7 @@ Little Brother v3 uses a structured data model with these core tables:
 - **Mouse**: Movement, clicks, scroll patterns
 - **File Watch**: File system access events
 - **Browser**: Tab changes, navigation (when CDP enabled)
-- **Context Snapshot**: Periodic system state captures
+- **Context Snapshot**: Periodic system state captures *(deprecated by default - see Configuration)*
 
 ### Event Fields
 All events include:
@@ -150,6 +150,36 @@ All events include:
 - System passwords or credentials
 
 All data remains **local** in the `./lb_data/` directory. The monitoring system includes an **idempotent importer** that can safely re-process data without duplicates.
+
+## Configuration
+
+### Context Snapshot Deprecation
+
+**Live idle detection (context snapshots) is disabled by default** to reduce runtime fragility. The system will run more reliably without complex event-driven idle detection.
+
+To **re-enable live idle detection** if needed:
+```yaml
+# In lb_data/config.yaml
+monitors:
+  context_snapshot:
+    enabled: true
+    idle_gap: "7.0s"  # Time before idle snapshot
+```
+
+To **enable quiescence snapshots** (recommended lightweight alternative):
+```yaml
+# In lb_data/config.yaml
+monitors:
+  context_snapshot:
+    enabled: false  # Keep live detection off
+    quiescence:
+      enabled: true
+      interval: "300s"  # Every 5 minutes
+```
+
+**Why this change?** Live idle detection requires complex event monitoring and timing that can be fragile across different Windows configurations. Quiescence snapshots provide similar insights with much simpler, more reliable timer-based operation.
+
+**Commands still work:** `lb3 probe context` and `lb3 spool generate context_snapshot` work regardless of configuration for testing and debugging.
 
 ## Troubleshooting
 

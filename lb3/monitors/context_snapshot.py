@@ -56,7 +56,11 @@ class ContextSnapshotMonitor(MonitorBase):
 
         # Parse context_idle_gap from config
         config = get_effective_config()
-        idle_gap_str = config.heartbeat.poll_intervals.context_idle_gap
+        # Use new monitors.context_snapshot.idle_gap, fallback to old location for compatibility
+        if hasattr(config, "monitors") and config.monitors.context_snapshot:
+            idle_gap_str = config.monitors.context_snapshot.idle_gap
+        else:
+            idle_gap_str = config.heartbeat.poll_intervals.context_idle_gap
         self._idle_gap_s = self._parse_time_string(idle_gap_str)
 
         # Activity tracking
@@ -197,11 +201,15 @@ class ContextSnapshotMonitor(MonitorBase):
                 return
 
             # Simple debounce: ignore repeats of same monitor within 250ms
-            if (self._last_ignored_monitor == event.monitor and
-                current_time - self._last_ignored_time < 0.25):
+            if (
+                self._last_ignored_monitor == event.monitor
+                and current_time - self._last_ignored_time < 0.25
+            ):
                 return
 
-            logger.debug(f"Ignored event (not activity): {event.monitor}/{event.action}")
+            logger.debug(
+                f"Ignored event (not activity): {event.monitor}/{event.action}"
+            )
             self._last_ignored_monitor = event.monitor
             self._last_ignored_time = current_time
 
@@ -248,7 +256,9 @@ class ContextSnapshotMonitor(MonitorBase):
 
                 # Debug logging for idle gap detection
                 if os.environ.get("LB_DEBUG_SNAPSHOTS") == "1":
-                    logger.debug(f"Idle gap detected: {time_since_last_event:.1f}s since last activity ({self._last_event_monitor})")
+                    logger.debug(
+                        f"Idle gap detected: {time_since_last_event:.1f}s since last activity ({self._last_event_monitor})"
+                    )
 
         except Exception as e:
             logger.error(f"Error checking idle gap: {e}")
@@ -274,6 +284,7 @@ class ContextSnapshotMonitor(MonitorBase):
                 **counter_data,
                 "since_ms": since_ms,
                 "last_event_monitor": self._last_event_monitor,
+                "trigger": trigger,
             }
 
             # Create snapshot event

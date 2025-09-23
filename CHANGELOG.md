@@ -8,8 +8,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Quiescence Snapshots**: Lightweight timer-based alternative to live idle detection with configurable interval
+- **Monitor Configuration**: New `monitors.context_snapshot` config section with granular control over live idle detection and quiescence
+- **CLI Improvements**: Enhanced `lb3 monitors status -v` output shows configured/started/subscribed states explicitly
+- **Probe Exit Codes**: `lb3 probe context` now returns proper exit codes (0=success, 1=failure)
+
 ### Changed
+- **Context Snapshot Configuration**: Moved from `heartbeat.poll_intervals.context_idle_gap` to `monitors.context_snapshot.idle_gap` with backwards compatibility
+
 ### Deprecated
+- **Live Idle Detection**: Context snapshot monitor disabled by default to reduce runtime fragility
+  - Can be re-enabled with `monitors.context_snapshot.enabled: true`
+  - `lb3 probe context` and `lb3 spool generate context_snapshot` still work regardless of config
+  - Consider using quiescence snapshots instead: `monitors.context_snapshot.quiescence.enabled: true`
+
 ### Removed
 ### Fixed
 ### Security

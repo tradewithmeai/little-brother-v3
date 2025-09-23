@@ -985,9 +985,9 @@ def monitors_status(
             typer.echo(json_module.dumps(result, indent=2))
         else:
             if is_running:
-                typer.echo("Supervisor: RUNNING")
+                typer.echo("Supervisor: RUNNING (monitor threads detected)")
             else:
-                typer.echo("Supervisor: NOT RUNNING")
+                typer.echo("Supervisor: NOT RUNNING (no active monitor threads)")
 
             typer.echo()
             typer.echo("Monitor Status:")
@@ -1005,6 +1005,13 @@ def monitors_status(
 
                 if info["thread_alive"]:
                     status_indicators.append("thread alive")
+
+                # Add subscription status for context monitor in verbose mode
+                if verbose and monitor_name == "context" and "subscribed" in info:
+                    if info["subscribed"]:
+                        status_indicators.append("subscribed")
+                    else:
+                        status_indicators.append("NOT subscribed")
 
                 if info["error"]:
                     status_indicators.append(f"ERROR: {info['error']}")
@@ -1122,10 +1129,15 @@ def probe(
 
         # Exit with appropriate code
         if imported_count == 0:
+            typer.echo("[ERROR] Probe failed: no events imported")
             raise typer.Exit(1)
         else:
+            typer.echo("Probe completed successfully")
             raise typer.Exit(0)
 
+    except typer.Exit:
+        # Re-raise typer.Exit without modification to preserve exit codes
+        raise
     except Exception as e:
         typer.echo(f"[ERROR] Probe failed: {e}", err=True)
         raise typer.Exit(1) from e
