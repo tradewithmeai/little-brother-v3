@@ -47,6 +47,9 @@ class ActivityCounters:
 class ContextSnapshotMonitor(MonitorBase):
     """Monitor that emits context snapshots on foreground changes and idle gaps."""
 
+    # Only these monitors count as real user activity for idle gap detection
+    ALLOWED_ACTIVITY = {"keyboard", "mouse", "active_window"}
+
     def __init__(self, dry_run: bool = False):
         """Initialize context snapshot monitor."""
         super().__init__(dry_run)
@@ -60,15 +63,19 @@ class ContextSnapshotMonitor(MonitorBase):
         self._counters = ActivityCounters()
         self._counters_lock = threading.Lock()
 
-        # Event tracking for gap detection
-        self._last_event_time = time.time()
+        # Event tracking for gap detection (using monotonic time)
+        self._last_event_time = time.monotonic()
         self._last_event_monitor: Optional[str] = None
-        self._last_snapshot_time = 0.0
-        self._gap_window_start = 0.0  # For deduplication
+        self._last_snapshot_time = 0.0  # Wall clock for since_ms calculation
+        self._gap_window_start = time.monotonic()  # Monotonic for gap detection
 
         # Event bus subscription
         self._event_bus = get_event_bus()
         self._subscribed = False
+
+        # Debug tracking for ignored events (optional spam prevention)
+        self._last_ignored_monitor = None
+        self._last_ignored_time = 0.0
 
     @property
     def name(self) -> str:
@@ -98,17 +105,18 @@ class ContextSnapshotMonitor(MonitorBase):
             self._event_bus.subscribe(self._handle_event)
             self._subscribed = True
 
-            # Initialize timestamps
-            current_time = time.time()
-            self._last_event_time = current_time
-            self._last_snapshot_time = current_time
-            self._gap_window_start = current_time
+            # Initialize timestamps (monotonic for gap detection, wall clock for metadata)
+            current_monotonic = time.monotonic()
+            current_wall = time.time()
+            self._last_event_time = current_monotonic
+            self._last_snapshot_time = current_wall
+            self._gap_window_start = current_monotonic
 
             # Start event bus if not already running
             self._event_bus.start()
 
             logger.info(
-                f"Context snapshot monitoring started (idle gap: {self._idle_gap_s}s)"
+                f"Context snapshot monitoring started (idle gap: {self._idle_gap_s}s, allowed activity: {sorted(self.ALLOWED_ACTIVITY)})"
             )
 
         except Exception as e:
@@ -118,6 +126,9 @@ class ContextSnapshotMonitor(MonitorBase):
     def stop_monitoring(self) -> None:
         """Stop context snapshot monitoring."""
         try:
+            # Perform final idle gap check before stopping
+            self._check_idle_gap()
+
             if self._subscribed:
                 self._event_bus.unsubscribe(self._handle_event)
                 self._subscribed = False
@@ -153,27 +164,50 @@ class ContextSnapshotMonitor(MonitorBase):
     def _handle_event(self, event: Event) -> None:
         """Handle events from other monitors."""
         try:
-            current_time = time.time()
+            current_monotonic = time.monotonic()
 
-            # Ignore heartbeat events for idle gap detection (they are dummy events)
-            if event.monitor == "heartbeat":
-                return
+            # Only update last_event_time for allowed activity monitors
+            if event.monitor in self.ALLOWED_ACTIVITY:
+                self._last_event_time = current_monotonic
+                self._last_event_monitor = event.monitor
 
-            # Update last event tracking for non-heartbeat events
-            self._last_event_time = current_time
-            self._last_event_monitor = event.monitor
+                # Debug log for activity events (optional)
+                if os.environ.get("LB_DEBUG_SNAPSHOTS") == "1":
+                    logger.debug(f"Activity event: {event.monitor}/{event.action}")
+            else:
+                # Debug log for ignored events with spam prevention
+                self._log_ignored_event(event, current_monotonic)
 
-            # Count activity events for rolling counters
+            # Count activity events for rolling counters (all events, not just allowed)
             self._update_activity_counters(event)
 
             # Check for foreground change trigger
             if event.monitor == "active_window" and event.action == "window_change":
-                # Set last_event_monitor to active_window when triggered by foreground change
-                self._last_event_monitor = "active_window"
+                # Emit snapshot immediately on foreground change
                 self._emit_snapshot(trigger="foreground_change")
 
         except Exception as e:
             logger.error(f"Error handling event: {e}")
+
+    def _log_ignored_event(self, event: Event, current_time: float) -> None:
+        """Log ignored events with spam prevention."""
+        try:
+            # Only log if debug is enabled
+            if os.environ.get("LB_DEBUG_SNAPSHOTS") != "1":
+                return
+
+            # Simple debounce: ignore repeats of same monitor within 250ms
+            if (self._last_ignored_monitor == event.monitor and
+                current_time - self._last_ignored_time < 0.25):
+                return
+
+            logger.debug(f"Ignored event (not activity): {event.monitor}/{event.action}")
+            self._last_ignored_monitor = event.monitor
+            self._last_ignored_time = current_time
+
+        except Exception as e:
+            # Don't let debug logging break event handling
+            pass
 
     def _update_activity_counters(self, event: Event) -> None:
         """Update activity counters based on event type."""
@@ -200,17 +234,21 @@ class ContextSnapshotMonitor(MonitorBase):
     def _check_idle_gap(self) -> None:
         """Check if we should emit a snapshot due to idle gap."""
         try:
-            current_time = time.time()
-            time_since_last_event = current_time - self._last_event_time
+            current_monotonic = time.monotonic()
+            time_since_last_event = current_monotonic - self._last_event_time
 
             # Only emit if we've exceeded the idle gap and haven't emitted for this gap window
             if (
                 time_since_last_event >= self._idle_gap_s
-                and current_time > self._gap_window_start + self._idle_gap_s
+                and current_monotonic > self._gap_window_start + self._idle_gap_s
             ):
                 self._emit_snapshot(trigger="idle_gap")
                 # Set new gap window to prevent spam
-                self._gap_window_start = current_time
+                self._gap_window_start = current_monotonic
+
+                # Debug logging for idle gap detection
+                if os.environ.get("LB_DEBUG_SNAPSHOTS") == "1":
+                    logger.debug(f"Idle gap detected: {time_since_last_event:.1f}s since last activity ({self._last_event_monitor})")
 
         except Exception as e:
             logger.error(f"Error checking idle gap: {e}")
@@ -274,6 +312,7 @@ class ContextSnapshotMonitor(MonitorBase):
             debug_dir.mkdir(parents=True, exist_ok=True)
 
             # Prepare breadcrumb line (tab-separated)
+            # Use wall clock time for unix timestamp
             unix_ts = int(timestamp)
             last_monitor = self._last_event_monitor or "none"
             breadcrumb_line = (
