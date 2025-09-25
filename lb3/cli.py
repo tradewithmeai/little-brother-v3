@@ -27,6 +27,10 @@ app.add_typer(spool_app, name="spool")
 monitors_app = typer.Typer(help="Monitor management and diagnostics commands")
 app.add_typer(monitors_app, name="monitors")
 
+# AI command group
+ai_app = typer.Typer(help="AI analysis commands")
+app.add_typer(ai_app, name="ai")
+
 
 @db_app.command("schema-version")
 def db_schema_version() -> None:
@@ -75,6 +79,34 @@ def db_list_ai_objects() -> None:
 
             typer.echo(f"ai_tables={','.join(table_names)}")
             typer.echo(f"ai_indexes={','.join(index_names)}")
+    except Exception as e:
+        typer.echo(f"Error: {e}", err=True)
+        raise typer.Exit(1) from e
+
+
+@ai_app.command("metrics")
+def ai_metrics() -> None:
+    """Manage AI metrics catalog."""
+    pass
+
+
+@ai_app.command("metrics-list")
+def ai_metrics_list() -> None:
+    """List all metrics in the catalog."""
+    try:
+        from .database import get_database
+
+        db = get_database()
+        with db._get_connection() as conn:
+            # Get all metrics
+            metrics = conn.execute("""
+                SELECT metric_key, unit, version
+                FROM ai_metric_catalog
+                ORDER BY metric_key
+            """).fetchall()
+
+            for row in metrics:
+                typer.echo(f"metric_key={row[0]},unit={row[1]},version={row[2]}")
     except Exception as e:
         typer.echo(f"Error: {e}", err=True)
         raise typer.Exit(1) from e
