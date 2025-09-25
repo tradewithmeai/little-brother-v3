@@ -53,7 +53,9 @@ class Database:
 
             # Ensure schema_version row exists (v1 for existing schema)
             try:
-                version_row = conn.execute("SELECT version FROM schema_version LIMIT 1").fetchone()
+                version_row = conn.execute(
+                    "SELECT version FROM schema_version LIMIT 1"
+                ).fetchone()
                 if version_row is None:
                     conn.execute("INSERT INTO schema_version (version) VALUES (1)")
                     conn.commit()
@@ -174,11 +176,13 @@ class Database:
 
     def apply_migrations(self, conn: sqlite3.Connection) -> None:
         """Apply database migrations to reach latest schema version."""
-        from .migrations import MIGRATIONS, LATEST_SCHEMA_VERSION
+        from .migrations import LATEST_SCHEMA_VERSION, MIGRATIONS
 
         # Get current schema version
         try:
-            current_version = conn.execute("SELECT version FROM schema_version LIMIT 1").fetchone()
+            current_version = conn.execute(
+                "SELECT version FROM schema_version LIMIT 1"
+            ).fetchone()
             if current_version is None:
                 # Table exists but empty, treat as version 1
                 conn.execute("INSERT INTO schema_version (version) VALUES (1)")
@@ -193,7 +197,9 @@ class Database:
         # Apply migrations
         for migration in MIGRATIONS:
             if migration["version"] > current_version:
-                logger.info(f"schema version {current_version} → {migration['version']}")
+                logger.info(
+                    f"schema version {current_version} → {migration['version']}"
+                )
                 logger.info(f"applied migration: {migration['name']}")
 
                 # Execute migration SQL in transaction
@@ -205,7 +211,9 @@ class Database:
                             conn.execute(statement)
 
                     # Update schema version
-                    conn.execute("UPDATE schema_version SET version = ?", (migration["version"],))
+                    conn.execute(
+                        "UPDATE schema_version SET version = ?", (migration["version"],)
+                    )
                     conn.commit()
                     current_version = migration["version"]
 

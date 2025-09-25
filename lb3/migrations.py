@@ -61,6 +61,6 @@ MIGRATIONS = [
         CREATE INDEX IF NOT EXISTS idx_ai_hourly_metric_hour ON ai_hourly_summary(metric_key, hour_utc_start_ms);
 
         CREATE INDEX IF NOT EXISTS idx_ai_daily_metric_day ON ai_daily_summary(metric_key, day_utc_start_ms);
-        """
+        """,
     }
 ]
