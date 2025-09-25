@@ -88,6 +88,10 @@ def db_list_ai_objects() -> None:
 metrics_app = typer.Typer(help="AI metrics management commands")
 ai_app.add_typer(metrics_app, name="metrics")
 
+# AI Run commands
+run_app = typer.Typer(help="AI run lifecycle management commands")
+ai_app.add_typer(run_app, name="run")
+
 
 @metrics_app.command("list")
 def ai_metrics_list() -> None:
@@ -150,6 +154,131 @@ def ai_metrics_seed_twice() -> None:
         typer.echo(
             f"run2: inserted={result2['inserted']},updated={result2['updated']},total={result2['total']}"
         )
+    except Exception as e:
+        typer.echo(f"Error: {e}", err=True)
+        raise typer.Exit(1) from e
+
+
+@run_app.command("start")
+def ai_run_start(
+    since_utc_ms: int = typer.Option(..., help="Start time in UTC milliseconds"),
+    until_utc_ms: int = typer.Option(..., help="End time in UTC milliseconds"),
+    grace_minutes: int = typer.Option(..., help="Grace period in minutes"),
+    recompute_window_hours: int = typer.Option(..., help="Recompute window in hours"),
+    computed_by_version: int = typer.Option(1, help="Computed by version"),
+) -> None:
+    """Start a new AI run."""
+    try:
+        from .ai.run import start_run
+        from .database import get_database
+
+        db = get_database()
+
+        # Get metric versions from catalog
+        with db._get_connection() as conn:
+            metrics = conn.execute(
+                """
+                SELECT metric_key, version FROM ai_metric_catalog ORDER BY metric_key
+            """
+            ).fetchall()
+            metric_versions = {row[0]: row[1] for row in metrics}
+
+        params = {
+            "since_utc_ms": since_utc_ms,
+            "until_utc_ms": until_utc_ms,
+            "grace_minutes": grace_minutes,
+            "recompute_window_hours": recompute_window_hours,
+            "metric_versions": metric_versions,
+            "computed_by_version": computed_by_version,
+        }
+
+        run_id = start_run(db, params, computed_by_version=computed_by_version)
+
+        # Get the created run for output
+        with db._get_connection() as conn:
+            row = conn.execute(
+                """
+                SELECT started_utc_ms, code_git_sha FROM ai_run WHERE run_id = ?
+            """,
+                (run_id,),
+            ).fetchone()
+
+        sha_str = row[1] if row[1] else "none"
+        typer.echo(
+            f"run_id={run_id},started_utc_ms={row[0]},code_git_sha={sha_str},computed_by_version={computed_by_version}"
+        )
+
+    except Exception as e:
+        typer.echo(f"Error: {e}", err=True)
+        raise typer.Exit(1) from e
+
+
+@run_app.command("finish")
+def ai_run_finish(
+    run_id: str = typer.Option(..., help="Run ID to finish"),
+    status: str = typer.Option(..., help="Final status (ok|partial|failed)"),
+) -> None:
+    """Finish an AI run."""
+    try:
+        from .ai.run import finish_run
+        from .database import get_database
+
+        db = get_database()
+        finish_run(db, run_id, status)
+
+        # Get finished time
+        with db._get_connection() as conn:
+            row = conn.execute(
+                """
+                SELECT finished_utc_ms FROM ai_run WHERE run_id = ?
+            """,
+                (run_id,),
+            ).fetchone()
+
+        if row:
+            typer.echo(f"run_id={run_id},finished_utc_ms={row[0]},status={status}")
+        else:
+            typer.echo(f"Error: run_id {run_id} not found", err=True)
+            raise typer.Exit(1)
+
+    except Exception as e:
+        typer.echo(f"Error: {e}", err=True)
+        raise typer.Exit(1) from e
+
+
+@run_app.command("last")
+def ai_run_last() -> None:
+    """Show the most recent AI run as JSON."""
+    try:
+        import json
+
+        from .database import get_database
+
+        db = get_database()
+        with db._get_connection() as conn:
+            row = conn.execute(
+                """
+                SELECT run_id, started_utc_ms, finished_utc_ms, code_git_sha, params_json, status
+                FROM ai_run
+                ORDER BY started_utc_ms DESC
+                LIMIT 1
+            """
+            ).fetchone()
+
+        if row:
+            result = {
+                "run_id": row[0],
+                "started_utc_ms": row[1],
+                "finished_utc_ms": row[2],
+                "code_git_sha": row[3],
+                "params_json": row[4],
+                "status": row[5],
+            }
+            # Compact JSON with sorted keys
+            typer.echo(json.dumps(result, sort_keys=True, separators=(",", ":")))
+        else:
+            typer.echo("null")
+
     except Exception as e:
         typer.echo(f"Error: {e}", err=True)
         raise typer.Exit(1) from e
