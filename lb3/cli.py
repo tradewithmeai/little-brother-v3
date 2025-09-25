@@ -28,6 +28,58 @@ monitors_app = typer.Typer(help="Monitor management and diagnostics commands")
 app.add_typer(monitors_app, name="monitors")
 
 
+@db_app.command("schema-version")
+def db_schema_version() -> None:
+    """Show current database schema version."""
+    try:
+        from .database import get_database
+
+        db = get_database()
+        with db._get_connection() as conn:
+            version = conn.execute(
+                "SELECT version FROM schema_version LIMIT 1"
+            ).fetchone()[0]
+            typer.echo(f"version={version}")
+    except Exception as e:
+        typer.echo(f"Error: {e}", err=True)
+        raise typer.Exit(1) from e
+
+
+@db_app.command("list-ai-objects")
+def db_list_ai_objects() -> None:
+    """List AI-related database tables and indexes."""
+    try:
+        from .database import get_database
+
+        db = get_database()
+        with db._get_connection() as conn:
+            # Get AI tables
+            ai_tables = conn.execute(
+                """
+                SELECT name FROM sqlite_master
+                WHERE type='table' AND name LIKE 'ai_%'
+                ORDER BY name
+            """
+            ).fetchall()
+            table_names = [row[0] for row in ai_tables]
+
+            # Get AI indexes
+            ai_indexes = conn.execute(
+                """
+                SELECT name FROM sqlite_master
+                WHERE type='index' AND name LIKE 'idx_ai_%'
+                ORDER BY name
+            """
+            ).fetchall()
+            index_names = [row[0] for row in ai_indexes]
+
+            typer.echo(f"ai_tables={','.join(table_names)}")
+            typer.echo(f"ai_indexes={','.join(index_names)}")
+    except Exception as e:
+        typer.echo(f"Error: {e}", err=True)
+        raise typer.Exit(1) from e
+
+
 @app.command()
 def version() -> None:
     """Show version information."""

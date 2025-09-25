@@ -51,6 +51,19 @@ class Database:
             # Create indexes
             self._create_indexes(conn)
 
+            # Ensure schema_version row exists (v1 for existing schema)
+            try:
+                version_row = conn.execute("SELECT version FROM schema_version LIMIT 1").fetchone()
+                if version_row is None:
+                    conn.execute("INSERT INTO schema_version (version) VALUES (1)")
+                    conn.commit()
+            except sqlite3.OperationalError:
+                # Table doesn't exist yet (should have been created by _create_schema)
+                pass
+
+            # Apply migrations to reach latest version
+            self.apply_migrations(conn)
+
             logger.info(f"Database initialized at {self.db_path}")
 
     def _get_connection(self) -> sqlite3.Connection:
@@ -127,6 +140,10 @@ class Database:
             file_path_hash TEXT,
             attrs_json TEXT
         );
+
+        CREATE TABLE IF NOT EXISTS schema_version (
+            version INTEGER NOT NULL
+        );
         """
 
         # Execute each statement separately
@@ -154,6 +171,51 @@ class Database:
                 conn.execute(statement)
 
         conn.commit()
+
+    def apply_migrations(self, conn: sqlite3.Connection) -> None:
+        """Apply database migrations to reach latest schema version."""
+        from .migrations import MIGRATIONS, LATEST_SCHEMA_VERSION
+
+        # Get current schema version
+        try:
+            current_version = conn.execute("SELECT version FROM schema_version LIMIT 1").fetchone()
+            if current_version is None:
+                # Table exists but empty, treat as version 1
+                conn.execute("INSERT INTO schema_version (version) VALUES (1)")
+                conn.commit()
+                current_version = 1
+            else:
+                current_version = current_version[0]
+        except sqlite3.OperationalError:
+            # Table doesn't exist, will be created by schema creation
+            current_version = 1
+
+        # Apply migrations
+        for migration in MIGRATIONS:
+            if migration["version"] > current_version:
+                logger.info(f"schema version {current_version} → {migration['version']}")
+                logger.info(f"applied migration: {migration['name']}")
+
+                # Execute migration SQL in transaction
+                try:
+                    # Execute each statement separately
+                    for statement in migration["sql"].strip().split(";"):
+                        statement = statement.strip()
+                        if statement:
+                            conn.execute(statement)
+
+                    # Update schema version
+                    conn.execute("UPDATE schema_version SET version = ?", (migration["version"],))
+                    conn.commit()
+                    current_version = migration["version"]
+
+                except Exception as e:
+                    conn.rollback()
+                    logger.error(f"Migration {migration['name']} failed: {e}")
+                    raise
+
+        if current_version == LATEST_SCHEMA_VERSION:
+            logger.info(f"already at version {LATEST_SCHEMA_VERSION}")
 
     def health_check(self) -> dict[str, Any]:
         """Perform database health check and return status."""
