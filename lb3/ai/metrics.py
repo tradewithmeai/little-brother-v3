@@ -1,6 +1,5 @@
 """Metric catalog seeding and management for AI analysis."""
 
-
 from ..database import Database
 
 
