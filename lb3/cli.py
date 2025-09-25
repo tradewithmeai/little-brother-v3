@@ -99,11 +99,13 @@ def ai_metrics_list() -> None:
         db = get_database()
         with db._get_connection() as conn:
             # Get all metrics
-            metrics = conn.execute("""
+            metrics = conn.execute(
+                """
                 SELECT metric_key, unit, version
                 FROM ai_metric_catalog
                 ORDER BY metric_key
-            """).fetchall()
+            """
+            ).fetchall()
 
             for row in metrics:
                 typer.echo(f"metric_key={row[0]},unit={row[1]},version={row[2]}")
