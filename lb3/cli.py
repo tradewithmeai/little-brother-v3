@@ -84,13 +84,12 @@ def db_list_ai_objects() -> None:
         raise typer.Exit(1) from e
 
 
-@ai_app.command("metrics")
-def ai_metrics() -> None:
-    """Manage AI metrics catalog."""
-    pass
+# AI Metrics commands
+metrics_app = typer.Typer(help="AI metrics management commands")
+ai_app.add_typer(metrics_app, name="metrics")
 
 
-@ai_app.command("metrics-list")
+@metrics_app.command("list")
 def ai_metrics_list() -> None:
     """List all metrics in the catalog."""
     try:
@@ -109,6 +108,48 @@ def ai_metrics_list() -> None:
 
             for row in metrics:
                 typer.echo(f"metric_key={row[0]},unit={row[1]},version={row[2]}")
+    except Exception as e:
+        typer.echo(f"Error: {e}", err=True)
+        raise typer.Exit(1) from e
+
+
+@metrics_app.command("seed")
+def ai_metrics_seed() -> None:
+    """Seed metrics catalog once."""
+    try:
+        from .ai.metrics import seed_metric_catalog
+        from .database import get_database
+
+        db = get_database()
+        result = seed_metric_catalog(db)
+        typer.echo(
+            f"inserted={result['inserted']},updated={result['updated']},total={result['total']}"
+        )
+    except Exception as e:
+        typer.echo(f"Error: {e}", err=True)
+        raise typer.Exit(1) from e
+
+
+@metrics_app.command("seed-twice")
+def ai_metrics_seed_twice() -> None:
+    """Seed metrics catalog twice to prove idempotency."""
+    try:
+        from .ai.metrics import seed_metric_catalog
+        from .database import get_database
+
+        db = get_database()
+
+        # First run
+        result1 = seed_metric_catalog(db)
+        typer.echo(
+            f"run1: inserted={result1['inserted']},updated={result1['updated']},total={result1['total']}"
+        )
+
+        # Second run
+        result2 = seed_metric_catalog(db)
+        typer.echo(
+            f"run2: inserted={result2['inserted']},updated={result2['updated']},total={result2['total']}"
+        )
     except Exception as e:
         typer.echo(f"Error: {e}", err=True)
         raise typer.Exit(1) from e
