@@ -1,6 +1,6 @@
 """Database migration framework for Little Brother v3."""
 
-LATEST_SCHEMA_VERSION = 2
+LATEST_SCHEMA_VERSION = 3
 
 MIGRATIONS = [
     {
@@ -62,5 +62,19 @@ MIGRATIONS = [
 
         CREATE INDEX IF NOT EXISTS idx_ai_daily_metric_day ON ai_daily_summary(metric_key, day_utc_start_ms);
         """,
-    }
+    },
+    {
+        "version": 3,
+        "name": "advisory_locks_v1",
+        "sql": """
+        CREATE TABLE IF NOT EXISTS ai_lock(
+            lock_name TEXT PRIMARY KEY,
+            owner_token TEXT NOT NULL,
+            acquired_utc_ms INTEGER NOT NULL,
+            expires_utc_ms INTEGER NOT NULL
+        );
+
+        CREATE INDEX IF NOT EXISTS idx_ai_lock_expires ON ai_lock(expires_utc_ms);
+        """,
+    },
 ]

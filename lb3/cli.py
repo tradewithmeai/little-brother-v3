@@ -92,6 +92,10 @@ ai_app.add_typer(metrics_app, name="metrics")
 run_app = typer.Typer(help="AI run lifecycle management commands")
 ai_app.add_typer(run_app, name="run")
 
+# AI Lock commands
+lock_app = typer.Typer(help="AI advisory lock management commands")
+ai_app.add_typer(lock_app, name="lock")
+
 
 @metrics_app.command("list")
 def ai_metrics_list() -> None:
@@ -278,6 +282,105 @@ def ai_run_last() -> None:
             typer.echo(json.dumps(result, sort_keys=True, separators=(",", ":")))
         else:
             typer.echo("null")
+
+    except Exception as e:
+        typer.echo(f"Error: {e}", err=True)
+        raise typer.Exit(1) from e
+
+
+@lock_app.command("acquire")
+def ai_lock_acquire(
+    lock_name: str = typer.Option(..., help="Name of the lock to acquire"),
+    ttl_sec: int = typer.Option(300, help="Time-to-live in seconds (default: 300)"),
+) -> None:
+    """Acquire an advisory lock."""
+    try:
+        from .ai.lock import acquire_lock
+        from .database import get_database
+
+        db = get_database()
+        result = acquire_lock(db, lock_name, ttl_sec)
+
+        if result["success"]:
+            typer.echo(
+                f"success=true,owner_token={result['owner_token']},expires_utc_ms={result['expires_utc_ms']}"
+            )
+        else:
+            typer.echo(
+                f"success=false,reason={result['reason']},held_by={result['held_by']},expires_utc_ms={result['expires_utc_ms']}"
+            )
+            raise typer.Exit(1)
+
+    except Exception as e:
+        typer.echo(f"Error: {e}", err=True)
+        raise typer.Exit(1) from e
+
+
+@lock_app.command("renew")
+def ai_lock_renew(
+    lock_name: str = typer.Option(..., help="Name of the lock to renew"),
+    owner_token: str = typer.Option(..., help="Token proving ownership"),
+    ttl_sec: int = typer.Option(300, help="New time-to-live in seconds (default: 300)"),
+) -> None:
+    """Renew an existing advisory lock."""
+    try:
+        from .ai.lock import renew_lock
+        from .database import get_database
+
+        db = get_database()
+        result = renew_lock(db, lock_name, owner_token, ttl_sec)
+
+        if result["success"]:
+            typer.echo(f"success=true,expires_utc_ms={result['expires_utc_ms']}")
+        else:
+            typer.echo(f"success=false,reason={result['reason']}")
+            raise typer.Exit(1)
+
+    except Exception as e:
+        typer.echo(f"Error: {e}", err=True)
+        raise typer.Exit(1) from e
+
+
+@lock_app.command("release")
+def ai_lock_release(
+    lock_name: str = typer.Option(..., help="Name of the lock to release"),
+    owner_token: str = typer.Option(..., help="Token proving ownership"),
+) -> None:
+    """Release an advisory lock."""
+    try:
+        from .ai.lock import release_lock
+        from .database import get_database
+
+        db = get_database()
+        result = release_lock(db, lock_name, owner_token)
+
+        if result["success"]:
+            typer.echo("success=true")
+        else:
+            typer.echo(f"success=false,reason={result['reason']}")
+            raise typer.Exit(1)
+
+    except Exception as e:
+        typer.echo(f"Error: {e}", err=True)
+        raise typer.Exit(1) from e
+
+
+@lock_app.command("status")
+def ai_lock_status(
+    lock_name: str = typer.Option(..., help="Name of the lock to check"),
+) -> None:
+    """Get status of an advisory lock."""
+    try:
+        import json
+
+        from .ai.lock import lock_status
+        from .database import get_database
+
+        db = get_database()
+        result = lock_status(db, lock_name)
+
+        # Compact JSON with sorted keys
+        typer.echo(json.dumps(result, sort_keys=True, separators=(",", ":")))
 
     except Exception as e:
         typer.echo(f"Error: {e}", err=True)

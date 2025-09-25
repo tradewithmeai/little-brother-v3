@@ -1,6 +1,5 @@
 """Unit tests for robust context idle gap behavior."""
 
-import time
 from unittest.mock import MagicMock, patch
 
 import pytest
