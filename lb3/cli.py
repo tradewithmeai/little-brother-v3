@@ -463,12 +463,23 @@ def ai_summarise(
     until_utc_ms: int = typer.Option(..., help="End time in UTC milliseconds"),
     grace_minutes: int = typer.Option(..., help="Minutes to skip for incomplete hours"),
     computed_by_version: int = typer.Option(1, help="Version of computation logic"),
+    idle_mode: str = typer.Option(
+        "simple", help="Idle calculation mode: simple or session-gap"
+    ),
 ) -> None:
     """Run hourly summarisation for the given time range."""
     try:
         from .ai import lock, run, summarise
         from .ai.timeutils import iter_hours
         from .database import get_database
+
+        # Validate idle_mode parameter
+        if idle_mode not in ["simple", "session-gap"]:
+            typer.echo(
+                f"Error: idle_mode must be 'simple' or 'session-gap', got '{idle_mode}'",
+                err=True,
+            )
+            raise typer.Exit(1)
 
         db = get_database()
 
@@ -490,6 +501,7 @@ def ai_summarise(
                 "since_utc_ms": since_utc_ms,
                 "until_utc_ms": until_utc_ms,
                 "grace_minutes": grace_minutes,
+                "idle_mode": idle_mode,
                 "metric_versions": {},  # TODO: Read from ai_metric_catalog
                 "computed_by_version": computed_by_version,
             }
@@ -503,6 +515,7 @@ def ai_summarise(
                 grace_minutes,
                 run_id,
                 computed_by_version,
+                idle_mode=idle_mode,
             )
 
             # Finish run successfully

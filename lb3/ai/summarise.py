@@ -2,6 +2,7 @@
 
 import json
 import time
+from typing import Literal
 
 from ..database import Database
 from . import focus, input_hash, run, timeutils
@@ -14,6 +15,7 @@ def summarise_hours(
     grace_minutes: int,
     run_id: str,
     computed_by_version: int = 1,
+    idle_mode: Literal["simple", "session-gap"] = "simple",
 ) -> dict[str, int]:
     """Summarise activity data into hourly metrics.
 
@@ -77,9 +79,12 @@ def summarise_hours(
                 )
 
         # Calculate focus_minutes
-        focus_minutes = sum(
+        focus_minutes_raw = sum(
             (s["end_ms"] - s["start_ms"]) / 60000 for s in hour_sessions
         )
+
+        # Round minute metrics to 2 decimal places and enforce constraints
+        focus_minutes = round(min(60.0, max(0.0, focus_minutes_raw)), 2)
 
         # Calculate keyboard and mouse events
         with db._get_connection() as conn:
@@ -106,14 +111,18 @@ def summarise_hours(
             all_sessions, hstart_ms, hend_ms
         )
 
-        # Calculate idle_minutes
-        idle_minutes = max(0, min(60, 60 - focus_minutes))
+        # Calculate idle_minutes based on mode
+        if idle_mode == "simple":
+            idle_minutes = round(max(0.0, 60.0 - focus_minutes), 2)
+        else:  # session-gap
+            idle_minutes = round(max(0.0, min(60.0, 60.0 - focus_minutes)), 2)
 
         # Calculate deep_focus_minutes - longest continuous single-app block
-        deep_focus_minutes = _calculate_deep_focus_minutes(hour_sessions)
+        deep_focus_minutes_raw = _calculate_deep_focus_minutes(hour_sessions)
+        deep_focus_minutes = round(min(60.0, max(0.0, deep_focus_minutes_raw)), 2)
 
         # Calculate coverage_ratio
-        coverage_ratio = min(1.0, focus_minutes / 60.0)
+        coverage_ratio = round(min(1.0, focus_minutes / 60.0), 4)
 
         # Define metrics to upsert
         metrics = {
@@ -149,33 +158,46 @@ def summarise_hours(
             },
         }
 
-        # Upsert metrics
+        # Upsert metrics with true idempotency
         current_time_ms = int(time.time() * 1000)
 
         with db._get_connection() as conn:
             for metric_key, metric_data in metrics.items():
-                # Check if row exists and needs update
+                # Check if row exists and compare values that matter for updates
                 existing = conn.execute(
                     """
-                    SELECT value_num, input_row_count, coverage_ratio, input_hash_hex, run_id, computed_by_version
+                    SELECT value_num, input_row_count, coverage_ratio, input_hash_hex, computed_by_version
                     FROM ai_hourly_summary
                     WHERE hour_utc_start_ms = ? AND metric_key = ?
                     """,
                     (hstart_ms, metric_key),
                 ).fetchone()
 
-                new_values = (
-                    metric_data["value_num"],
+                new_significant_values = (
+                    round(
+                        metric_data["value_num"], 2
+                    ),  # Round to avoid float precision issues
                     metric_data["input_row_count"],
-                    metric_data["coverage_ratio"],
+                    round(
+                        metric_data["coverage_ratio"], 4
+                    ),  # Round to avoid float precision issues
                     hash_result["hash_hex"],
-                    run_id,
                     computed_by_version,
                 )
 
+                existing_rounded = None
                 if existing:
-                    # Check if update is needed
-                    if existing != new_values:
+                    existing_rounded = (
+                        round(existing[0], 2),  # Round existing value_num
+                        existing[1],  # input_row_count
+                        round(existing[2], 4),  # Round existing coverage_ratio
+                        existing[3],  # input_hash_hex
+                        existing[4],  # computed_by_version
+                    )
+
+                if existing:
+                    # Check if update is needed (only if significant values changed)
+                    if existing_rounded != new_significant_values:
                         conn.execute(
                             """
                             UPDATE ai_hourly_summary
@@ -196,6 +218,7 @@ def summarise_hours(
                             ),
                         )
                         updates += 1
+                    # If no significant change, do not update at all (preserving run_id/updated_utc_ms)
                 else:
                     # Insert new row
                     conn.execute(
@@ -221,7 +244,7 @@ def summarise_hours(
                     )
                     inserts += 1
 
-        # Calculate and upsert top_app_minutes evidence
+        # Calculate and upsert top_app_minutes evidence with idempotency
         evidence = _calculate_top_app_evidence(hour_sessions)
         evidence_json = json.dumps(evidence, separators=(",", ":"), sort_keys=True)
 
@@ -236,6 +259,7 @@ def summarise_hours(
             ).fetchone()
 
             if existing_evidence:
+                # Only update if evidence actually changed
                 if existing_evidence[0] != evidence_json:
                     conn.execute(
                         """
@@ -245,7 +269,9 @@ def summarise_hours(
                         """,
                         (evidence_json, hstart_ms, "top_app_minutes"),
                     )
+                # If evidence unchanged, do not update at all
             else:
+                # Insert new evidence row
                 conn.execute(
                     """
                     INSERT INTO ai_hourly_evidence (hour_utc_start_ms, metric_key, evidence_json)

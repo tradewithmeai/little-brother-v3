@@ -308,14 +308,144 @@ def test_summarise_hours():
                 assert evidence[0]["app_id"] == "app2"  # Top app
                 assert abs(evidence[0]["minutes"] - 30.0) < 0.1
 
-            # Test idempotency - run again should yield zero updates
+            # Test idempotency with different run_id - should yield zero updates
+            test_run_id2 = "test_run_456"
             result2 = summarise_hours(
-                db, since_ms, until_ms, grace_minutes=60, run_id=test_run_id
+                db, since_ms, until_ms, grace_minutes=60, run_id=test_run_id2
             )
 
             assert result2["hours_processed"] >= 1
             assert result2["inserts"] == 0  # No new inserts
-            assert result2["updates"] == 0  # No updates needed
+            assert (
+                result2["updates"] == 0
+            )  # No updates needed even with different run_id
+
+            # Test data change detection - modify one event and run again
+            with db._get_connection() as conn:
+                # Add one more keyboard event to change input data
+                conn.execute(
+                    """
+                    INSERT INTO events (id, ts_utc, monitor, action, subject_type, session_id, subject_id)
+                    VALUES (?, ?, ?, ?, ?, ?, ?)
+                """,
+                    (
+                        "key_new",
+                        hour1_start + 30000,
+                        "keyboard",
+                        "keydown",
+                        "app",
+                        "session1",
+                        "app1",
+                    ),
+                )
+                conn.commit()
+
+            # Run again - should detect changes and update
+            test_run_id3 = "test_run_789"
+            result3 = summarise_hours(
+                db, since_ms, until_ms, grace_minutes=60, run_id=test_run_id3
+            )
+
+            assert result3["hours_processed"] >= 1
+            assert result3["inserts"] == 0  # No new inserts
+            assert (
+                result3["updates"] > 0
+            )  # Should update at least keyboard_events metric
+
+        finally:
+            close_db_connections(db)
+
+
+def test_idempotency():
+    """Test that repeated runs with same data yield zero updates."""
+    with tempfile.TemporaryDirectory() as temp_dir:
+        db_path = Path(temp_dir) / "test_idempotency.db"
+        db = Database(db_path)
+
+        try:
+            # Create minimal test data
+            current_time = int(time.time() * 1000)
+            with db._get_connection() as conn:
+                conn.execute(
+                    "INSERT INTO apps (id, exe_name, exe_path_hash, first_seen_utc, last_seen_utc) VALUES (?, ?, ?, ?, ?)",
+                    ("app1", "TestApp.exe", "hash1", current_time, current_time),
+                )
+                conn.execute(
+                    "INSERT INTO windows (id, app_id, title_hash, first_seen_utc, last_seen_utc) VALUES (?, ?, ?, ?, ?)",
+                    ("window1", "app1", "hash_window1", current_time, current_time),
+                )
+
+                # Fixed hour for testing
+                base_time = 1640944800000  # 2022-01-01 00:00:00 UTC
+                hour_start = base_time
+                hour_end = base_time + 3600000
+
+                # Add some events
+                conn.execute(
+                    """
+                    INSERT INTO events (id, ts_utc, monitor, action, subject_type, session_id, subject_id)
+                    VALUES (?, ?, ?, ?, ?, ?, ?)
+                """,
+                    (
+                        "focus1",
+                        hour_start + 30000,
+                        "active_window",
+                        "focus",
+                        "window",
+                        "session1",
+                        "window1",
+                    ),
+                )
+                conn.execute(
+                    """
+                    INSERT INTO events (id, ts_utc, monitor, action, subject_type, session_id, subject_id)
+                    VALUES (?, ?, ?, ?, ?, ?, ?)
+                """,
+                    (
+                        "key1",
+                        hour_start + 45000,
+                        "keyboard",
+                        "keydown",
+                        "app",
+                        "session1",
+                        "app1",
+                    ),
+                )
+                conn.commit()
+
+            # First run
+            since_ms = hour_start
+            until_ms = current_time + 3600000  # Future time
+            run_id1 = "run_001"
+
+            result1 = summarise_hours(
+                db, since_ms, until_ms, grace_minutes=60, run_id=run_id1
+            )
+
+            # Should have inserts, no updates
+            assert result1["hours_processed"] == 1
+            assert result1["inserts"] > 0
+            assert result1["updates"] == 0
+
+            # Second run with different run_id but same data
+            run_id2 = "run_002"
+
+            result2 = summarise_hours(
+                db, since_ms, until_ms, grace_minutes=60, run_id=run_id2
+            )
+
+            # Should have no inserts or updates (truly idempotent)
+            assert result2["hours_processed"] == 1
+            assert result2["inserts"] == 0
+            assert result2["updates"] == 0
+
+            # Verify evidence is also idempotent
+            with db._get_connection() as conn:
+                evidence_count = conn.execute(
+                    "SELECT COUNT(*) FROM ai_hourly_evidence WHERE hour_utc_start_ms = ?",
+                    (hour_start,),
+                ).fetchone()[0]
+                assert evidence_count == 1  # Should still be just one row
 
         finally:
             close_db_connections(db)
