@@ -96,6 +96,10 @@ ai_app.add_typer(run_app, name="run")
 lock_app = typer.Typer(help="AI advisory lock management commands")
 ai_app.add_typer(lock_app, name="lock")
 
+# AI Dev commands
+dev_app = typer.Typer(help="AI development and debugging commands")
+ai_app.add_typer(dev_app, name="dev")
+
 
 @metrics_app.command("list")
 def ai_metrics_list() -> None:
@@ -377,6 +381,70 @@ def ai_lock_status(
             typer.echo(f"locked=True,owner={result['owner_token']},expires_utc_ms={result['expires_utc_ms']},expired=False")
         else:
             typer.echo("locked=False,owner=none,expires_utc_ms=none,expired=False")
+
+    except Exception as e:
+        typer.echo(f"Error: {e}", err=True)
+        raise typer.Exit(1) from e
+
+
+@dev_app.command("hours")
+def ai_dev_hours(
+    since_utc_ms: int = typer.Option(..., help="Start time in UTC milliseconds"),
+    until_utc_ms: int = typer.Option(..., help="End time in UTC milliseconds"),
+) -> None:
+    """Show hour grid windows for the given time range."""
+    try:
+        from .ai.timeutils import iter_hours
+
+        windows = iter_hours(since_utc_ms, until_utc_ms)
+        typer.echo(f"count={len(windows)}")
+
+        # Show first 3 and last 3 if more than 3
+        if len(windows) <= 3:
+            for i, (hstart, hend) in enumerate(windows):
+                typer.echo(f"win={i},hstart_ms={hstart},hend_ms={hend}")
+        else:
+            # First 3
+            for i in range(3):
+                hstart, hend = windows[i]
+                typer.echo(f"win={i},hstart_ms={hstart},hend_ms={hend}")
+            # Last 3 if more than 6 total
+            if len(windows) > 6:
+                for i in range(len(windows) - 3, len(windows)):
+                    hstart, hend = windows[i]
+                    typer.echo(f"...win={i},hstart_ms={hstart},hend_ms={hend}")
+            else:
+                # Show remaining windows normally
+                for i in range(3, len(windows)):
+                    hstart, hend = windows[i]
+                    typer.echo(f"win={i},hstart_ms={hstart},hend_ms={hend}")
+
+    except Exception as e:
+        typer.echo(f"Error: {e}", err=True)
+        raise typer.Exit(1) from e
+
+
+@dev_app.command("hour-hash")
+def ai_dev_hour_hash(
+    hstart_utc_ms: int = typer.Option(..., help="Hour start time in UTC milliseconds"),
+    hend_utc_ms: int = typer.Option(..., help="Hour end time in UTC milliseconds"),
+) -> None:
+    """Calculate input hash for a specific hour window."""
+    try:
+        from .ai.input_hash import calc_input_hash_for_hour
+        from .ai.run import get_code_git_sha
+        from .database import get_database
+
+        db = get_database()
+        code_git_sha = get_code_git_sha()
+        result = calc_input_hash_for_hour(db, hstart_utc_ms, hend_utc_ms, code_git_sha)
+
+        first_id_str = result["first_id"] if result["first_id"] else "none"
+        last_id_str = result["last_id"] if result["last_id"] else "none"
+
+        typer.echo(
+            f"hour={hstart_utc_ms}-{hend_utc_ms},count={result['count']},min_ts={result['min_ts']},max_ts={result['max_ts']},first_id={first_id_str},last_id={last_id_str},hash={result['hash_hex']}"
+        )
 
     except Exception as e:
         typer.echo(f"Error: {e}", err=True)
