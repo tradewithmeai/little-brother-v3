@@ -306,9 +306,13 @@ def ai_lock_acquire(
         result = acquire_lock(db, name, ttl_sec)
 
         if result["success"]:
-            typer.echo(f"acquired=True,owner={result['owner_token']},expires_utc_ms={result['expires_utc_ms']}")
+            typer.echo(
+                f"acquired=True,owner={result['owner_token']},expires_utc_ms={result['expires_utc_ms']}"
+            )
         else:
-            typer.echo(f"acquired=False,owner={result['held_by']},expires_utc_ms={result['expires_utc_ms']}")
+            typer.echo(
+                f"acquired=False,owner={result['held_by']},expires_utc_ms={result['expires_utc_ms']}"
+            )
             raise typer.Exit(1)
 
     except Exception as e:
@@ -378,7 +382,9 @@ def ai_lock_status(
         result = lock_status(db, name)
 
         if result["exists"]:
-            typer.echo(f"locked=True,owner={result['owner_token']},expires_utc_ms={result['expires_utc_ms']},expired=False")
+            typer.echo(
+                f"locked=True,owner={result['owner_token']},expires_utc_ms={result['expires_utc_ms']},expired=False"
+            )
         else:
             typer.echo("locked=False,owner=none,expires_utc_ms=none,expired=False")
 

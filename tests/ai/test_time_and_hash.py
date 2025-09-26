@@ -1,7 +1,6 @@
 """Test time utilities and input hash functionality."""
 
 import tempfile
-import time
 from pathlib import Path
 
 from lb3.ai.input_hash import calc_input_hash_for_hour
