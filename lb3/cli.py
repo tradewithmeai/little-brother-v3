@@ -457,6 +457,123 @@ def ai_dev_hour_hash(
         raise typer.Exit(1) from e
 
 
+@ai_app.command("summarise")
+def ai_summarise(
+    since_utc_ms: int = typer.Option(..., help="Start time in UTC milliseconds"),
+    until_utc_ms: int = typer.Option(..., help="End time in UTC milliseconds"),
+    grace_minutes: int = typer.Option(..., help="Minutes to skip for incomplete hours"),
+    computed_by_version: int = typer.Option(1, help="Version of computation logic"),
+) -> None:
+    """Run hourly summarisation for the given time range."""
+    try:
+        from .ai import lock, run, summarise
+        from .ai.timeutils import iter_hours
+        from .database import get_database
+
+        db = get_database()
+
+        # Calculate TTL based on hour count
+        hours = iter_hours(since_utc_ms, until_utc_ms)
+        ttl_sec = max(300, (len(hours) * 60 + grace_minutes + 1) * 60)
+
+        # Acquire advisory lock
+        lock_result = lock.acquire_lock(db, "summarise", ttl_sec)
+        if not lock_result["success"]:
+            typer.echo(f"Error: {lock_result['reason']}", err=True)
+            raise typer.Exit(1)
+
+        owner_token = lock_result["owner_token"]
+
+        try:
+            # Start run
+            params = {
+                "since_utc_ms": since_utc_ms,
+                "until_utc_ms": until_utc_ms,
+                "grace_minutes": grace_minutes,
+                "metric_versions": {},  # TODO: Read from ai_metric_catalog
+                "computed_by_version": computed_by_version,
+            }
+            run_id = run.start_run(db, params, computed_by_version=computed_by_version)
+
+            # Run summarisation
+            result = summarise.summarise_hours(
+                db,
+                since_utc_ms,
+                until_utc_ms,
+                grace_minutes,
+                run_id,
+                computed_by_version,
+            )
+
+            # Finish run successfully
+            run.finish_run(db, run_id, "ok")
+
+            # Output result
+            typer.echo(
+                f"hours_processed={result['hours_processed']},inserts={result['inserts']},updates={result['updates']},skipped_open_hours={result['skipped_open_hours']},run_id={run_id}"
+            )
+
+        except Exception as e:
+            # Finish run with error
+            run.finish_run(db, run_id, "failed")
+            raise e
+
+        finally:
+            # Always release lock
+            lock.release_lock(db, "summarise", owner_token)
+
+    except Exception as e:
+        typer.echo(f"Error: {e}", err=True)
+        raise typer.Exit(1) from e
+
+
+@ai_app.command("hour")
+def ai_hour_show(
+    hstart_utc_ms: int = typer.Option(..., help="Hour start time in UTC milliseconds"),
+) -> None:
+    """Show hourly summary metrics and evidence for a specific hour."""
+    try:
+        from .database import get_database
+
+        db = get_database()
+
+        with db._get_connection() as conn:
+            # Get summary metrics for this hour
+            metrics = conn.execute(
+                """
+                SELECT metric_key, value_num, coverage_ratio
+                FROM ai_hourly_summary
+                WHERE hour_utc_start_ms = ?
+                ORDER BY metric_key
+                """,
+                (hstart_utc_ms,),
+            ).fetchall()
+
+            # Print metrics
+            for metric_key, value_num, coverage_ratio in metrics:
+                typer.echo(
+                    f"metric_key={metric_key},value_num={value_num},coverage_ratio={coverage_ratio}"
+                )
+
+            # Get evidence if present
+            evidence = conn.execute(
+                """
+                SELECT metric_key, evidence_json
+                FROM ai_hourly_evidence
+                WHERE hour_utc_start_ms = ?
+                """,
+                (hstart_utc_ms,),
+            ).fetchone()
+
+            if evidence:
+                metric_key, evidence_json = evidence
+                typer.echo(f"evidence[ {metric_key} ]={evidence_json}")
+
+    except Exception as e:
+        typer.echo(f"Error: {e}", err=True)
+        raise typer.Exit(1) from e
+
+
 @app.command()
 def version() -> None:
     """Show version information."""
