@@ -1,6 +1,6 @@
 """Database migration framework for Little Brother v3."""
 
-LATEST_SCHEMA_VERSION = 3
+LATEST_SCHEMA_VERSION = 4
 
 MIGRATIONS = [
     {
@@ -75,6 +75,27 @@ MIGRATIONS = [
         );
 
         CREATE INDEX IF NOT EXISTS idx_ai_lock_expires ON ai_lock(expires_utc_ms);
+        """,
+    },
+    {
+        "version": 4,
+        "name": "reporting_audit_v1",
+        "sql": """
+        CREATE TABLE IF NOT EXISTS ai_report(
+            report_id TEXT PRIMARY KEY,
+            kind TEXT NOT NULL,
+            period_start_ms INTEGER NOT NULL,
+            period_end_ms INTEGER NOT NULL,
+            format TEXT NOT NULL,
+            file_path TEXT NOT NULL,
+            file_sha256 TEXT NOT NULL,
+            generated_utc_ms INTEGER NOT NULL,
+            run_id TEXT NOT NULL REFERENCES ai_run(run_id),
+            input_hash_hex TEXT NOT NULL,
+            UNIQUE(kind, period_start_ms, format)
+        );
+
+        CREATE INDEX IF NOT EXISTS idx_ai_report_period ON ai_report(kind, period_start_ms);
         """,
     },
 ]

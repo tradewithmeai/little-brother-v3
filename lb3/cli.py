@@ -899,6 +899,237 @@ def ai_reconcile(
         raise typer.Exit(1) from e
 
 
+# AI Report commands
+report_app = typer.Typer(help="AI report generation commands")
+ai_app.add_typer(report_app, name="report")
+
+
+@report_app.command("hourly")
+def ai_report_hourly(
+    hstart_utc_ms: int = typer.Option(..., help="Hour start time in UTC milliseconds"),
+    formats: str = typer.Option("txt,json,csv", help="Comma-separated formats"),
+) -> None:
+    """Generate hourly report files."""
+    try:
+        import datetime
+        from .ai import lock, report, run
+        from .database import get_database
+
+        # Parse formats
+        format_list = [f.strip() for f in formats.split(",")]
+        valid_formats = {"txt", "json", "csv"}
+        for fmt in format_list:
+            if fmt not in valid_formats:
+                typer.echo(f"Error: Invalid format '{fmt}'. Valid: {valid_formats}", err=True)
+                raise typer.Exit(1)
+
+        db = get_database()
+        hend_ms = hstart_utc_ms + 3600000  # One hour
+
+        # Acquire advisory lock
+        lock_result = lock.acquire_lock(db, "report-hourly", 300)
+        if not lock_result["success"]:
+            typer.echo(f"Error: {lock_result['reason']}", err=True)
+            raise typer.Exit(1)
+
+        owner_token = lock_result["owner_token"]
+
+        try:
+            # Start run
+            params = {
+                "hstart_utc_ms": hstart_utc_ms,
+                "formats": formats,
+                "report_type": "hourly",
+            }
+            run_id = run.start_run(db, params, computed_by_version=1)
+
+            # Render report data
+            report_data = report.render_hourly_report(db, hstart_utc_ms, hend_ms)
+            hour_hash = report_data["hour_hash"]
+            hash8 = hour_hash[:8]
+
+            # Ensure reports directory structure
+            reports_dir = report.ensure_reports_dir()
+            dt = datetime.datetime.fromtimestamp(hstart_utc_ms / 1000, datetime.timezone.utc)
+            year_month_day = dt.strftime("%Y/%m/%d")
+            target_dir = reports_dir / year_month_day
+            target_dir.mkdir(parents=True, exist_ok=True)
+
+            # Write files and collect paths
+            file_paths = []
+            for fmt in format_list:
+                filename = f"hourly-{hstart_utc_ms}-{hash8}.{fmt}"
+                file_path = target_dir / filename
+                relative_path = f"{year_month_day}/{filename}"
+
+                if fmt == "txt":
+                    file_sha256 = report.write_text(file_path, report_data["txt"])
+                elif fmt == "json":
+                    file_sha256 = report.write_json(file_path, report_data["json"])
+                elif fmt == "csv":
+                    file_sha256 = report.write_csv(file_path, report_data["csv_rows"])
+
+                # Upsert report row
+                report.upsert_report_row(
+                    db,
+                    kind="hourly",
+                    period_start_ms=hstart_utc_ms,
+                    period_end_ms=hend_ms,
+                    format=fmt,
+                    file_path=relative_path,
+                    file_sha256=file_sha256,
+                    run_id=run_id,
+                    input_hash_hex=hour_hash,
+                )
+
+                file_paths.append(relative_path)
+
+            # Finish run successfully
+            run.finish_run(db, run_id, "ok")
+
+            # Output result
+            files_str = ",".join(file_paths)
+            typer.echo(f"hourly_report hstart={hstart_utc_ms} files={files_str}")
+
+        except Exception as e:
+            # Finish run with error
+            run.finish_run(db, run_id, "failed")
+            raise e
+
+        finally:
+            # Always release lock
+            lock.release_lock(db, "report-hourly", owner_token)
+
+    except Exception as e:
+        typer.echo(f"Error: {e}", err=True)
+        raise typer.Exit(1) from e
+
+
+@report_app.command("daily")
+def ai_report_daily(
+    day_utc_ms: int = typer.Option(..., help="Day start time in UTC milliseconds"),
+    formats: str = typer.Option("txt,json,csv", help="Comma-separated formats"),
+) -> None:
+    """Generate daily report files."""
+    try:
+        import datetime
+        from .ai import lock, report, run
+        from .database import get_database
+
+        # Parse formats
+        format_list = [f.strip() for f in formats.split(",")]
+        valid_formats = {"txt", "json", "csv"}
+        for fmt in format_list:
+            if fmt not in valid_formats:
+                typer.echo(f"Error: Invalid format '{fmt}'. Valid: {valid_formats}", err=True)
+                raise typer.Exit(1)
+
+        db = get_database()
+        day_end_ms = day_utc_ms + 86400000  # One day
+
+        # Acquire advisory lock
+        lock_result = lock.acquire_lock(db, "report-daily", 300)
+        if not lock_result["success"]:
+            typer.echo(f"Error: {lock_result['reason']}", err=True)
+            raise typer.Exit(1)
+
+        owner_token = lock_result["owner_token"]
+
+        try:
+            # Start run
+            params = {
+                "day_utc_ms": day_utc_ms,
+                "formats": formats,
+                "report_type": "daily",
+            }
+            run_id = run.start_run(db, params, computed_by_version=1)
+
+            # Render report data
+            report_data = report.render_daily_report(db, day_utc_ms)
+            day_hash = report_data["day_hash"]
+            hash8 = day_hash[:8] if day_hash else "00000000"
+
+            # Ensure reports directory structure
+            reports_dir = report.ensure_reports_dir()
+            dt = datetime.datetime.fromtimestamp(day_utc_ms / 1000, datetime.timezone.utc)
+            year_month_day = dt.strftime("%Y/%m/%d")
+            target_dir = reports_dir / year_month_day
+            target_dir.mkdir(parents=True, exist_ok=True)
+
+            # Write files and collect paths
+            file_paths = []
+            for fmt in format_list:
+                filename = f"daily-{day_utc_ms}-{hash8}.{fmt}"
+                file_path = target_dir / filename
+                relative_path = f"{year_month_day}/{filename}"
+
+                if fmt == "txt":
+                    file_sha256 = report.write_text(file_path, report_data["txt"])
+                elif fmt == "json":
+                    file_sha256 = report.write_json(file_path, report_data["json"])
+                elif fmt == "csv":
+                    file_sha256 = report.write_csv(file_path, report_data["csv_rows"])
+
+                # Upsert report row
+                report.upsert_report_row(
+                    db,
+                    kind="daily",
+                    period_start_ms=day_utc_ms,
+                    period_end_ms=day_end_ms,
+                    format=fmt,
+                    file_path=relative_path,
+                    file_sha256=file_sha256,
+                    run_id=run_id,
+                    input_hash_hex=day_hash or "",
+                )
+
+                file_paths.append(relative_path)
+
+            # Finish run successfully
+            run.finish_run(db, run_id, "ok")
+
+            # Output result
+            files_str = ",".join(file_paths)
+            typer.echo(f"daily_report day_start={day_utc_ms} files={files_str}")
+
+        except Exception as e:
+            # Finish run with error
+            run.finish_run(db, run_id, "failed")
+            raise e
+
+        finally:
+            # Always release lock
+            lock.release_lock(db, "report-daily", owner_token)
+
+    except Exception as e:
+        typer.echo(f"Error: {e}", err=True)
+        raise typer.Exit(1) from e
+
+
+@report_app.command("show")
+def ai_report_show(
+    path: str = typer.Option(..., help="Relative path from reports directory"),
+) -> None:
+    """Show report file content verbatim."""
+    try:
+        from .ai import report
+
+        reports_dir = report.ensure_reports_dir()
+        file_path = reports_dir / path
+
+        if not file_path.exists():
+            typer.echo(f"Error: File not found: {path}", err=True)
+            raise typer.Exit(1)
+
+        # Output file content verbatim
+        content = file_path.read_text(encoding="utf-8")
+        typer.echo(content, nl=False)
+
+    except Exception as e:
+        typer.echo(f"Error: {e}", err=True)
+        raise typer.Exit(1) from e
+
+
 @app.command()
 def version() -> None:
     """Show version information."""
