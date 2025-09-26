@@ -229,7 +229,9 @@ def test_daily_report_creation():
 
             # Create hourly and daily summaries
             run_id = "test_daily_report_run"
-            summarise_hours(db, hour_start, hour_start + 3600000, grace_minutes=0, run_id=run_id)
+            summarise_hours(
+                db, hour_start, hour_start + 3600000, grace_minutes=0, run_id=run_id
+            )
             summarise_days(db, day_start, day_start + 86400000, run_id)
 
             # Test report rendering
@@ -284,7 +286,7 @@ def test_report_show_content():
         reports_dir.mkdir(parents=True, exist_ok=True)
 
         # Create test files
-        txt_content = "metric_key=test,value_num=42,coverage_ratio=0.8\nevidence[ top_app_minutes ]=[{\"app_id\":\"test\",\"minutes\":10.5}]"
+        txt_content = 'metric_key=test,value_num=42,coverage_ratio=0.8\nevidence[ top_app_minutes ]=[{"app_id":"test","minutes":10.5}]'
         txt_path = reports_dir / "test.txt"
         write_text(txt_path, txt_content)
 
@@ -292,7 +294,10 @@ def test_report_show_content():
         json_path = reports_dir / "test.json"
         write_json(json_path, json_content)
 
-        csv_rows = [{"metric_key": "test", "value_num": 42}, {"metric_key": "test2", "value_num": 24}]
+        csv_rows = [
+            {"metric_key": "test", "value_num": 42},
+            {"metric_key": "test2", "value_num": 24},
+        ]
         csv_path = reports_dir / "test.csv"
         write_csv(csv_path, csv_rows)
 
@@ -316,6 +321,7 @@ def test_ensure_reports_dir():
     with tempfile.TemporaryDirectory() as temp_dir:
         # Change to temp directory for this test
         import os
+
         original_cwd = os.getcwd()
         try:
             os.chdir(temp_dir)

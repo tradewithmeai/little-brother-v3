@@ -912,6 +912,7 @@ def ai_report_hourly(
     """Generate hourly report files."""
     try:
         import datetime
+
         from .ai import lock, report, run
         from .database import get_database
 
@@ -920,7 +921,9 @@ def ai_report_hourly(
         valid_formats = {"txt", "json", "csv"}
         for fmt in format_list:
             if fmt not in valid_formats:
-                typer.echo(f"Error: Invalid format '{fmt}'. Valid: {valid_formats}", err=True)
+                typer.echo(
+                    f"Error: Invalid format '{fmt}'. Valid: {valid_formats}", err=True
+                )
                 raise typer.Exit(1)
 
         db = get_database()
@@ -950,7 +953,9 @@ def ai_report_hourly(
 
             # Ensure reports directory structure
             reports_dir = report.ensure_reports_dir()
-            dt = datetime.datetime.fromtimestamp(hstart_utc_ms / 1000, datetime.timezone.utc)
+            dt = datetime.datetime.fromtimestamp(
+                hstart_utc_ms / 1000, datetime.timezone.utc
+            )
             year_month_day = dt.strftime("%Y/%m/%d")
             target_dir = reports_dir / year_month_day
             target_dir.mkdir(parents=True, exist_ok=True)
@@ -1013,6 +1018,7 @@ def ai_report_daily(
     """Generate daily report files."""
     try:
         import datetime
+
         from .ai import lock, report, run
         from .database import get_database
 
@@ -1021,7 +1027,9 @@ def ai_report_daily(
         valid_formats = {"txt", "json", "csv"}
         for fmt in format_list:
             if fmt not in valid_formats:
-                typer.echo(f"Error: Invalid format '{fmt}'. Valid: {valid_formats}", err=True)
+                typer.echo(
+                    f"Error: Invalid format '{fmt}'. Valid: {valid_formats}", err=True
+                )
                 raise typer.Exit(1)
 
         db = get_database()
@@ -1051,7 +1059,9 @@ def ai_report_daily(
 
             # Ensure reports directory structure
             reports_dir = report.ensure_reports_dir()
-            dt = datetime.datetime.fromtimestamp(day_utc_ms / 1000, datetime.timezone.utc)
+            dt = datetime.datetime.fromtimestamp(
+                day_utc_ms / 1000, datetime.timezone.utc
+            )
             year_month_day = dt.strftime("%Y/%m/%d")
             target_dir = reports_dir / year_month_day
             target_dir.mkdir(parents=True, exist_ok=True)

@@ -128,7 +128,12 @@ def upsert_report_row(
         ).fetchone()
 
         if existing:
-            existing_report_id, existing_sha256, existing_input_hash, created_time = existing
+            (
+                existing_report_id,
+                existing_sha256,
+                existing_input_hash,
+                created_time,
+            ) = existing
 
             # Only update if sha256 or input hash changed
             if existing_sha256 != file_sha256 or existing_input_hash != input_hash_hex:
@@ -218,8 +223,11 @@ def render_hourly_report(db: Database, hstart_ms: int, hend_ms: int) -> dict:
     else:
         # Compute hash if no stored data
         from . import run
+
         git_sha = run.get_code_git_sha()
-        hash_result = input_hash.calc_input_hash_for_hour(db, hstart_ms, hend_ms, git_sha)
+        hash_result = input_hash.calc_input_hash_for_hour(
+            db, hstart_ms, hend_ms, git_sha
+        )
         hour_hash = hash_result["hash_hex"]
 
     # Parse evidence
@@ -230,10 +238,14 @@ def render_hourly_report(db: Database, hstart_ms: int, hend_ms: int) -> dict:
     # Generate TXT format
     txt_lines = []
     for metric_key, value_num, coverage_ratio, _ in metrics_rows:
-        txt_lines.append(f"metric_key={metric_key},value_num={value_num},coverage_ratio={coverage_ratio}")
+        txt_lines.append(
+            f"metric_key={metric_key},value_num={value_num},coverage_ratio={coverage_ratio}"
+        )
 
     if evidence_data:
-        evidence_compact = json.dumps(evidence_data, separators=(",", ":"), sort_keys=True)
+        evidence_compact = json.dumps(
+            evidence_data, separators=(",", ":"), sort_keys=True
+        )
         txt_lines.append(f"evidence[ top_app_minutes ]={evidence_compact}")
 
     txt_content = "\n".join(txt_lines)
@@ -258,11 +270,13 @@ def render_hourly_report(db: Database, hstart_ms: int, hend_ms: int) -> dict:
     # Generate CSV format
     csv_rows = []
     for metric_key, value_num, coverage_ratio, _ in metrics_rows:
-        csv_rows.append({
-            "metric_key": metric_key,
-            "value_num": value_num,
-            "coverage_ratio": coverage_ratio,
-        })
+        csv_rows.append(
+            {
+                "metric_key": metric_key,
+                "value_num": value_num,
+                "coverage_ratio": coverage_ratio,
+            }
+        )
 
     return {
         "hour_hash": hour_hash,
@@ -331,12 +345,14 @@ def render_daily_report(db: Database, day_ms: int) -> dict:
     # Generate CSV format
     csv_rows = []
     for metric_key, value_num, hours_counted, low_conf_hours, _ in metrics_rows:
-        csv_rows.append({
-            "metric_key": metric_key,
-            "value_num": value_num,
-            "hours_counted": hours_counted,
-            "low_conf_hours": low_conf_hours,
-        })
+        csv_rows.append(
+            {
+                "metric_key": metric_key,
+                "value_num": value_num,
+                "hours_counted": hours_counted,
+                "low_conf_hours": low_conf_hours,
+            }
+        )
 
     return {
         "day_hash": day_hash,
