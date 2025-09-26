@@ -96,6 +96,10 @@ ai_app.add_typer(run_app, name="run")
 lock_app = typer.Typer(help="AI advisory lock management commands")
 ai_app.add_typer(lock_app, name="lock")
 
+# AI Advice commands
+advice_app = typer.Typer(help="AI advice generation and display commands")
+ai_app.add_typer(advice_app, name="advise")
+
 # AI Dev commands
 dev_app = typer.Typer(help="AI development and debugging commands")
 ai_app.add_typer(dev_app, name="dev")
@@ -387,6 +391,286 @@ def ai_lock_status(
             )
         else:
             typer.echo("locked=False,owner=none,expires_utc_ms=none,expired=False")
+
+    except Exception as e:
+        typer.echo(f"Error: {e}", err=True)
+        raise typer.Exit(1) from e
+
+
+# AI Advice commands
+@advice_app.command("hours")
+def ai_advice_hours(
+    since_utc_ms: int = typer.Option(..., help="Start time in UTC milliseconds"),
+    until_utc_ms: int = typer.Option(..., help="End time in UTC milliseconds"),
+) -> None:
+    """Generate advice for closed hours in the given time range."""
+    try:
+        from .ai.advice import get_hourly_advice, upsert_hourly_advice
+        from .ai.lock import acquire_lock, release_lock
+        from .ai.run import finish_run, start_run
+        from .ai.timeutils import iter_hours
+        from .database import get_database
+
+        db = get_database()
+
+        # Calculate TTL based on hours count
+        hours = list(iter_hours(since_utc_ms, until_utc_ms))
+        ttl_sec = max(300, len(hours) * 10)  # At least 300s, 10s per hour
+
+        # Acquire advisory lock
+        lock_result = acquire_lock(db, "advise-hours", ttl_sec)
+        if not lock_result["success"]:
+            typer.echo(f"Error: {lock_result['reason']}", err=True)
+            raise typer.Exit(1)
+
+        owner_token = lock_result["owner_token"]
+
+        try:
+            # Start run
+            run_id = start_run(
+                db, {"since_utc_ms": since_utc_ms, "until_utc_ms": until_utc_ms}
+            )
+
+            hours_examined = 0
+            advice_created = 0
+            advice_updated = 0
+            skipped_open_hours = 0
+            current_time_ms = int(__import__("time").time() * 1000)
+
+            for hour_start_ms, hour_end_ms in hours:
+                # Skip open hours (current hour)
+                if hour_end_ms > current_time_ms:
+                    skipped_open_hours += 1
+                    continue
+
+                hours_examined += 1
+
+                # Generate advice for this hour
+                advice_list = get_hourly_advice(db, hour_start_ms, hour_end_ms, run_id)
+
+                # Upsert each advice
+                for advice in advice_list:
+                    result = upsert_hourly_advice(
+                        db,
+                        hour_start_ms,
+                        advice["rule_key"],
+                        advice["rule_version"],
+                        advice["severity"],
+                        advice["score"],
+                        advice["advice_text"],
+                        advice["input_hash_hex"],
+                        advice["evidence_json"],
+                        advice["reason_json"],
+                        run_id,
+                    )
+                    if result["action"] == "inserted":
+                        advice_created += 1
+                    elif result["action"] == "updated":
+                        advice_updated += 1
+
+            # Finish run
+            finish_run(db, run_id, "ok")
+
+        finally:
+            # Release lock
+            release_lock(db, "advise-hours", owner_token)
+
+        typer.echo(
+            f"advise_hours hours_examined={hours_examined},advice_created={advice_created},advice_updated={advice_updated},skipped_open_hours={skipped_open_hours}"
+        )
+
+    except Exception as e:
+        typer.echo(f"Error: {e}", err=True)
+        raise typer.Exit(1) from e
+
+
+@advice_app.command("day")
+def ai_advice_day(
+    day_utc_ms: int = typer.Option(
+        ..., help="Day start time in UTC milliseconds (midnight)"
+    ),
+    yesterday: bool = typer.Option(
+        False, help="Use yesterday's date (ignores day-utc-ms)"
+    ),
+) -> None:
+    """Generate advice for a specific day."""
+    try:
+        from .ai.advice import get_daily_advice, upsert_daily_advice
+        from .ai.lock import acquire_lock, release_lock
+        from .ai.run import finish_run, start_run
+        from .database import get_database
+
+        db = get_database()
+
+        # Calculate day start if yesterday flag is used
+        if yesterday:
+            import datetime
+
+            now = datetime.datetime.utcnow()
+            yesterday_date = now - datetime.timedelta(days=1)
+            day_start = yesterday_date.replace(
+                hour=0, minute=0, second=0, microsecond=0
+            )
+            day_utc_ms = int(day_start.timestamp() * 1000)
+
+        # Acquire advisory lock
+        lock_result = acquire_lock(db, "advise-day", 600)
+        if not lock_result["success"]:
+            typer.echo(f"Error: {lock_result['reason']}", err=True)
+            raise typer.Exit(1)
+
+        owner_token = lock_result["owner_token"]
+
+        try:
+            # Start run
+            run_id = start_run(db, {"day_utc_ms": day_utc_ms})
+
+            advice_created = 0
+            advice_updated = 0
+
+            # Generate advice for this day
+            advice_list = get_daily_advice(db, day_utc_ms, run_id)
+
+            # Upsert each advice
+            for advice in advice_list:
+                result = upsert_daily_advice(
+                    db,
+                    day_utc_ms,
+                    advice["rule_key"],
+                    advice["rule_version"],
+                    advice["severity"],
+                    advice["score"],
+                    advice["advice_text"],
+                    advice["input_hash_hex"],
+                    advice["evidence_json"],
+                    advice["reason_json"],
+                    run_id,
+                )
+                if result["action"] == "inserted":
+                    advice_created += 1
+                elif result["action"] == "updated":
+                    advice_updated += 1
+
+            # Finish run
+            finish_run(db, run_id, "ok")
+
+        finally:
+            # Release lock
+            release_lock(db, "advise-day", owner_token)
+
+        typer.echo(
+            f"advise_day day_start={day_utc_ms},advice_created={advice_created},advice_updated={advice_updated}"
+        )
+
+    except Exception as e:
+        typer.echo(f"Error: {e}", err=True)
+        raise typer.Exit(1) from e
+
+
+# AI Advice show commands
+show_app = typer.Typer(help="AI advice display commands")
+advice_app.add_typer(show_app, name="show")
+
+
+@show_app.command("hour")
+def ai_advice_show_hour(
+    hstart_utc_ms: int = typer.Option(..., help="Hour start time in UTC milliseconds"),
+) -> None:
+    """Show advice for a specific hour."""
+    try:
+        from .database import get_database
+
+        db = get_database()
+
+        with db._get_connection() as conn:
+            rows = conn.execute(
+                """
+                SELECT rule_key, rule_version, severity, score, advice_text, input_hash_hex
+                FROM ai_advice_hourly
+                WHERE hour_utc_start_ms = ?
+                ORDER BY rule_key
+                """,
+                (hstart_utc_ms,),
+            ).fetchall()
+
+        for (
+            rule_key,
+            rule_version,
+            severity,
+            score,
+            advice_text,
+            input_hash_hex,
+        ) in rows:
+            typer.echo(
+                f'advice rule={rule_key},version={rule_version},severity={severity},score={score},text="{advice_text}",hash={input_hash_hex}'
+            )
+
+        typer.echo(f"count={len(rows)}")
+
+    except Exception as e:
+        typer.echo(f"Error: {e}", err=True)
+        raise typer.Exit(1) from e
+
+
+@show_app.command("day")
+def ai_advice_show_day(
+    day_utc_ms: int = typer.Option(..., help="Day start time in UTC milliseconds"),
+) -> None:
+    """Show advice for a specific day."""
+    try:
+        from .database import get_database
+
+        db = get_database()
+
+        with db._get_connection() as conn:
+            rows = conn.execute(
+                """
+                SELECT rule_key, rule_version, severity, score, advice_text, input_hash_hex
+                FROM ai_advice_daily
+                WHERE day_utc_start_ms = ?
+                ORDER BY rule_key
+                """,
+                (day_utc_ms,),
+            ).fetchall()
+
+        for (
+            rule_key,
+            rule_version,
+            severity,
+            score,
+            advice_text,
+            input_hash_hex,
+        ) in rows:
+            typer.echo(
+                f'advice rule={rule_key},version={rule_version},severity={severity},score={score},text="{advice_text}",hash={input_hash_hex}'
+            )
+
+        typer.echo(f"count={len(rows)}")
+
+    except Exception as e:
+        typer.echo(f"Error: {e}", err=True)
+        raise typer.Exit(1) from e
+
+
+@advice_app.command("list-rules")
+def ai_advice_list_rules() -> None:
+    """List available advice rules."""
+    try:
+        from .database import get_database
+
+        db = get_database()
+
+        with db._get_connection() as conn:
+            rows = conn.execute(
+                """
+                SELECT rule_key, version, title
+                FROM ai_advice_rule_catalog
+                ORDER BY rule_key, version
+                """,
+            ).fetchall()
+
+        for rule_key, version, title in rows:
+            typer.echo(f"{rule_key},{version},{title}")
 
     except Exception as e:
         typer.echo(f"Error: {e}", err=True)

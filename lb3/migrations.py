@@ -1,6 +1,6 @@
 """Database migration framework for Little Brother v3."""
 
-LATEST_SCHEMA_VERSION = 4
+LATEST_SCHEMA_VERSION = 5
 
 MIGRATIONS = [
     {
@@ -96,6 +96,62 @@ MIGRATIONS = [
         );
 
         CREATE INDEX IF NOT EXISTS idx_ai_report_period ON ai_report(kind, period_start_ms);
+        """,
+    },
+    {
+        "version": 5,
+        "name": "advice_v1",
+        "sql": """
+        CREATE TABLE IF NOT EXISTS ai_advice_hourly(
+            advice_id TEXT PRIMARY KEY,
+            hour_utc_start_ms INTEGER NOT NULL,
+            rule_key TEXT NOT NULL,
+            rule_version INTEGER NOT NULL,
+            severity TEXT NOT NULL,
+            score REAL NOT NULL,
+            advice_text TEXT NOT NULL,
+            input_hash_hex TEXT NOT NULL,
+            evidence_json TEXT NOT NULL,
+            reason_json TEXT NOT NULL,
+            run_id TEXT NOT NULL REFERENCES ai_run(run_id),
+            UNIQUE(hour_utc_start_ms, rule_key, rule_version)
+        );
+
+        CREATE TABLE IF NOT EXISTS ai_advice_daily(
+            advice_id TEXT PRIMARY KEY,
+            day_utc_start_ms INTEGER NOT NULL,
+            rule_key TEXT NOT NULL,
+            rule_version INTEGER NOT NULL,
+            severity TEXT NOT NULL,
+            score REAL NOT NULL,
+            advice_text TEXT NOT NULL,
+            input_hash_hex TEXT NOT NULL,
+            evidence_json TEXT NOT NULL,
+            reason_json TEXT NOT NULL,
+            run_id TEXT NOT NULL REFERENCES ai_run(run_id),
+            UNIQUE(day_utc_start_ms, rule_key, rule_version)
+        );
+
+        CREATE TABLE IF NOT EXISTS ai_advice_rule_catalog(
+            rule_key TEXT NOT NULL,
+            version INTEGER NOT NULL,
+            title TEXT NOT NULL,
+            description TEXT NOT NULL,
+            PRIMARY KEY(rule_key, version)
+        );
+
+        CREATE INDEX IF NOT EXISTS idx_ai_advice_hourly_hour ON ai_advice_hourly(hour_utc_start_ms);
+        CREATE INDEX IF NOT EXISTS idx_ai_advice_daily_day ON ai_advice_daily(day_utc_start_ms);
+
+        INSERT OR IGNORE INTO ai_advice_rule_catalog(rule_key, version, title, description) VALUES
+        ('low_focus', 1, 'Low Focus Time', 'Warns when focused time drops below 25 minutes per hour'),
+        ('high_switches', 1, 'High Context Switching', 'Warns when context switches exceed 12 per hour'),
+        ('deep_focus_positive', 1, 'Strong Deep Focus', 'Celebrates extended deep focus blocks'),
+        ('passive_input', 1, 'Passive Input Pattern', 'Notes periods of low input with active window time'),
+        ('long_idle', 1, 'Extended Idle Time', 'Notes extended idle periods over 40 minutes'),
+        ('low_daily_focus', 1, 'Low Daily Focus', 'Warns when daily focused time drops below 3 hours'),
+        ('positive_deep_focus_day', 1, 'Strong Daily Deep Focus', 'Celebrates days with significant deep focus'),
+        ('high_switch_day', 1, 'High Daily Switching', 'Warns when daily context switches exceed 150');
         """,
     },
 ]
