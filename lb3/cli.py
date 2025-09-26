@@ -736,6 +736,169 @@ def ai_daily_show(
         raise typer.Exit(1) from e
 
 
+@ai_app.command("verify")
+def ai_verify(
+    target: str = typer.Argument(..., help="Target to verify: 'hours' or 'days'"),
+    since_utc_ms: int = typer.Option(..., help="Start time in UTC milliseconds"),
+    until_utc_ms: int = typer.Option(..., help="End time in UTC milliseconds"),
+    grace_minutes: int = typer.Option(
+        5, help="Grace minutes for open hours (hours only)"
+    ),
+) -> None:
+    """Verify integrity of hourly or daily summaries."""
+    try:
+        from .ai import reconcile
+        from .ai.summarise_days import day_range_ms
+        from .database import get_database
+
+        db = get_database()
+
+        if target == "hours":
+            mismatches = reconcile.find_hour_mismatches(
+                db, since_utc_ms, until_utc_ms, grace_minutes
+            )
+            from .ai.timeutils import iter_hours
+
+            now_utc_ms = int(__import__("time").time() * 1000)
+            hours = [
+                (hstart, hend)
+                for hstart, hend in iter_hours(since_utc_ms, until_utc_ms)
+                if now_utc_ms >= hend + grace_minutes * 60000
+            ]
+            hours_examined = len(hours)
+            hstarts = ",".join(map(str, mismatches)) if mismatches else "none"
+            typer.echo(
+                f"hours_examined={hours_examined},mismatches={len(mismatches)},hstarts={hstarts}"
+            )
+
+        elif target == "days":
+            day_starts = day_range_ms(since_utc_ms, until_utc_ms)
+            mismatches = reconcile.find_day_mismatches(db, day_starts)
+            dstarts = ",".join(map(str, mismatches)) if mismatches else "none"
+            typer.echo(
+                f"days_examined={len(day_starts)},mismatches={len(mismatches)},dstarts={dstarts}"
+            )
+
+        else:
+            typer.echo(
+                f"Error: Invalid target '{target}'. Must be 'hours' or 'days'", err=True
+            )
+            raise typer.Exit(1)
+
+    except Exception as e:
+        typer.echo(f"Error: {e}", err=True)
+        raise typer.Exit(1) from e
+
+
+@ai_app.command("reconcile")
+def ai_reconcile(
+    target: str = typer.Argument(..., help="Target to reconcile: 'hours' or 'days'"),
+    since_utc_ms: int = typer.Option(..., help="Start time in UTC milliseconds"),
+    until_utc_ms: int = typer.Option(..., help="End time in UTC milliseconds"),
+    grace_minutes: int = typer.Option(
+        5, help="Grace minutes for open hours (hours only)"
+    ),
+    idle_mode: str = typer.Option(
+        "simple", help="Idle calculation mode: simple or session-gap (hours only)"
+    ),
+) -> None:
+    """Reconcile hourly or daily summaries by reprocessing mismatched data."""
+    try:
+        from .ai import lock, reconcile, run
+        from .ai.summarise_days import day_range_ms
+        from .ai.timeutils import iter_hours
+        from .database import get_database
+
+        # Validate idle_mode for hours
+        if target == "hours" and idle_mode not in ["simple", "session-gap"]:
+            typer.echo(
+                f"Error: idle_mode must be 'simple' or 'session-gap', got '{idle_mode}'",
+                err=True,
+            )
+            raise typer.Exit(1)
+
+        db = get_database()
+
+        if target == "hours":
+            lock_name = "reconcile-hours"
+            ttl_sec = 600
+        elif target == "days":
+            lock_name = "reconcile-days"
+            ttl_sec = 600
+        else:
+            typer.echo(
+                f"Error: Invalid target '{target}'. Must be 'hours' or 'days'", err=True
+            )
+            raise typer.Exit(1)
+
+        # Acquire advisory lock
+        lock_result = lock.acquire_lock(db, lock_name, ttl_sec)
+        if not lock_result["success"]:
+            typer.echo(f"Error: {lock_result['reason']}", err=True)
+            raise typer.Exit(1)
+
+        owner_token = lock_result["owner_token"]
+
+        try:
+            # Start run
+            params = {
+                "since_utc_ms": since_utc_ms,
+                "until_utc_ms": until_utc_ms,
+                "grace_minutes": grace_minutes,
+                "target": target,
+                "idle_mode": idle_mode if target == "hours" else "simple",
+                "computed_by_version": 1,
+            }
+            run_id = run.start_run(db, params, computed_by_version=1)
+
+            if target == "hours":
+                # Find and recompute mismatched hours
+                mismatches = reconcile.find_hour_mismatches(
+                    db, since_utc_ms, until_utc_ms, grace_minutes
+                )
+                result = reconcile.recompute_hours(
+                    db, mismatches, run_id, computed_by_version=1, idle_mode=idle_mode
+                )
+                # Count examined hours
+                now_utc_ms = int(__import__("time").time() * 1000)
+                hours = [
+                    (hstart, hend)
+                    for hstart, hend in iter_hours(since_utc_ms, until_utc_ms)
+                    if now_utc_ms >= hend + grace_minutes * 60000
+                ]
+                hours_examined = len(hours)
+                typer.echo(
+                    f"hours_examined={hours_examined},hours_reprocessed={result['hours_reprocessed']},inserts={result['inserts']},updates={result['updates']},run_id={run_id}"
+                )
+
+            else:  # days
+                # Find and recompute mismatched days
+                day_starts = day_range_ms(since_utc_ms, until_utc_ms)
+                mismatches = reconcile.find_day_mismatches(db, day_starts)
+                result = reconcile.recompute_days(
+                    db, mismatches, run_id, computed_by_version=1
+                )
+                typer.echo(
+                    f"days_examined={result['days_examined']},days_reprocessed={result['days_reprocessed']},inserts={result['inserts']},updates={result['updates']},run_id={run_id}"
+                )
+
+            # Finish run successfully
+            run.finish_run(db, run_id, "ok")
+
+        except Exception as e:
+            # Finish run with error
+            run.finish_run(db, run_id, "failed")
+            raise e
+
+        finally:
+            # Always release lock
+            lock.release_lock(db, lock_name, owner_token)
+
+    except Exception as e:
+        typer.echo(f"Error: {e}", err=True)
+        raise typer.Exit(1) from e
+
+
 @app.command()
 def version() -> None:
     """Show version information."""
