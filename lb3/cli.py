@@ -587,6 +587,155 @@ def ai_hour_show(
         raise typer.Exit(1) from e
 
 
+@ai_app.command("finalise")
+def ai_finalise(
+    day_utc_ms: int = typer.Option(
+        None, help="Exact UTC midnight start in milliseconds"
+    ),
+    yesterday: bool = typer.Option(False, help="Finalise yesterday's data"),
+) -> None:
+    """Finalise a day by running hourly and daily summarisation."""
+    try:
+        import time
+
+        from .ai import lock, run, summarise, summarise_days
+        from .database import get_database
+
+        # Validate input
+        if day_utc_ms is not None and yesterday:
+            typer.echo(
+                "Error: Cannot specify both --day-utc-ms and --yesterday", err=True
+            )
+            raise typer.Exit(1)
+
+        if day_utc_ms is None and not yesterday:
+            typer.echo(
+                "Error: Must specify either --day-utc-ms or --yesterday", err=True
+            )
+            raise typer.Exit(1)
+
+        # Calculate day start
+        if yesterday:
+            current_time = int(time.time())
+            yesterday_start = ((current_time - 86400) // 86400) * 86400
+            day_start_ms = yesterday_start * 1000
+        else:
+            day_start_ms = day_utc_ms
+
+        # Validate day alignment
+        day_start_sec = day_start_ms // 1000
+        if day_start_sec != (day_start_sec // 86400) * 86400:
+            typer.echo(
+                f"Error: day must be aligned to UTC midnight, got {day_start_ms}",
+                err=True,
+            )
+            raise typer.Exit(1)
+
+        db = get_database()
+
+        # Acquire advisory lock
+        lock_result = lock.acquire_lock(db, "finalise", 600)
+        if not lock_result["success"]:
+            typer.echo(f"Error: {lock_result['reason']}", err=True)
+            raise typer.Exit(1)
+
+        owner_token = lock_result["owner_token"]
+        day_end_ms = day_start_ms + 86400000
+
+        try:
+            # Start run
+            params = {
+                "day_start_ms": day_start_ms,
+                "day_end_ms": day_end_ms,
+                "idle_mode": "simple",
+                "computed_by_version": 1,
+            }
+            run_id = run.start_run(db, params, computed_by_version=1)
+
+            # Run hourly summarisation for the whole day
+            hour_result = summarise.summarise_hours(
+                db,
+                day_start_ms,
+                day_end_ms,
+                grace_minutes=5,
+                run_id=run_id,
+                computed_by_version=1,
+                idle_mode="simple",
+            )
+
+            # Run daily summarisation
+            day_result = summarise_days.summarise_days(
+                db, day_start_ms, day_end_ms, run_id, computed_by_version=1
+            )
+
+            # Finish run successfully
+            run.finish_run(db, run_id, "ok")
+
+            # Output result
+            typer.echo(
+                f"finalised_day={day_start_ms},hours_processed={hour_result['hours_processed']},hour_inserts={hour_result['inserts']},hour_updates={hour_result['updates']},days_processed={day_result['days_processed']},day_inserts={day_result['inserts']},day_updates={day_result['updates']},run_id={run_id}"
+            )
+
+        except Exception as e:
+            # Finish run with error
+            run.finish_run(db, run_id, "failed")
+            raise e
+
+        finally:
+            # Always release lock
+            lock.release_lock(db, "finalise", owner_token)
+
+    except Exception as e:
+        typer.echo(f"Error: {e}", err=True)
+        raise typer.Exit(1) from e
+
+
+@ai_app.command("daily")
+def ai_daily_show(
+    day_utc_ms: int = typer.Option(..., help="Day start UTC midnight in milliseconds"),
+) -> None:
+    """Show daily summary metrics for a specific day."""
+    try:
+        from .database import get_database
+
+        db = get_database()
+
+        with db._get_connection() as conn:
+            # Get daily metrics for this day
+            metrics = conn.execute(
+                """
+                SELECT metric_key, value_num, hours_counted, low_conf_hours, input_hash_hex
+                FROM ai_daily_summary
+                WHERE day_utc_start_ms = ?
+                ORDER BY metric_key
+                """,
+                (day_utc_ms,),
+            ).fetchall()
+
+            # Print metrics
+            day_hash = None
+            for (
+                metric_key,
+                value_num,
+                hours_counted,
+                low_conf_hours,
+                input_hash_hex,
+            ) in metrics:
+                typer.echo(
+                    f"metric_key={metric_key},value_num={value_num},hours_counted={hours_counted},low_conf_hours={low_conf_hours}"
+                )
+                if day_hash is None:
+                    day_hash = input_hash_hex
+
+            # Print day hash (should be same for all metrics)
+            if day_hash:
+                typer.echo(f"day_hash={day_hash}")
+
+    except Exception as e:
+        typer.echo(f"Error: {e}", err=True)
+        raise typer.Exit(1) from e
+
+
 @app.command()
 def version() -> None:
     """Show version information."""
