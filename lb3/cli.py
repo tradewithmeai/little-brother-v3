@@ -290,7 +290,7 @@ def ai_run_last() -> None:
 
 @lock_app.command("acquire")
 def ai_lock_acquire(
-    lock_name: str = typer.Option(..., help="Name of the lock to acquire"),
+    name: str = typer.Option(..., help="Name of the lock to acquire"),
     ttl_sec: int = typer.Option(300, help="Time-to-live in seconds (default: 300)"),
 ) -> None:
     """Acquire an advisory lock."""
@@ -299,16 +299,12 @@ def ai_lock_acquire(
         from .database import get_database
 
         db = get_database()
-        result = acquire_lock(db, lock_name, ttl_sec)
+        result = acquire_lock(db, name, ttl_sec)
 
         if result["success"]:
-            typer.echo(
-                f"success=true,owner_token={result['owner_token']},expires_utc_ms={result['expires_utc_ms']}"
-            )
+            typer.echo(f"acquired=True,owner={result['owner_token']},expires_utc_ms={result['expires_utc_ms']}")
         else:
-            typer.echo(
-                f"success=false,reason={result['reason']},held_by={result['held_by']},expires_utc_ms={result['expires_utc_ms']}"
-            )
+            typer.echo(f"acquired=False,owner={result['held_by']},expires_utc_ms={result['expires_utc_ms']}")
             raise typer.Exit(1)
 
     except Exception as e:
@@ -318,8 +314,8 @@ def ai_lock_acquire(
 
 @lock_app.command("renew")
 def ai_lock_renew(
-    lock_name: str = typer.Option(..., help="Name of the lock to renew"),
-    owner_token: str = typer.Option(..., help="Token proving ownership"),
+    name: str = typer.Option(..., help="Name of the lock to renew"),
+    owner: str = typer.Option(..., help="Token proving ownership"),
     ttl_sec: int = typer.Option(300, help="New time-to-live in seconds (default: 300)"),
 ) -> None:
     """Renew an existing advisory lock."""
@@ -328,12 +324,12 @@ def ai_lock_renew(
         from .database import get_database
 
         db = get_database()
-        result = renew_lock(db, lock_name, owner_token, ttl_sec)
+        result = renew_lock(db, name, owner, ttl_sec)
 
         if result["success"]:
-            typer.echo(f"success=true,expires_utc_ms={result['expires_utc_ms']}")
+            typer.echo(f"renewed=True,expires_utc_ms={result['expires_utc_ms']}")
         else:
-            typer.echo(f"success=false,reason={result['reason']}")
+            typer.echo("renewed=False,expires_utc_ms=none")
             raise typer.Exit(1)
 
     except Exception as e:
@@ -343,8 +339,8 @@ def ai_lock_renew(
 
 @lock_app.command("release")
 def ai_lock_release(
-    lock_name: str = typer.Option(..., help="Name of the lock to release"),
-    owner_token: str = typer.Option(..., help="Token proving ownership"),
+    name: str = typer.Option(..., help="Name of the lock to release"),
+    owner: str = typer.Option(..., help="Token proving ownership"),
 ) -> None:
     """Release an advisory lock."""
     try:
@@ -352,12 +348,12 @@ def ai_lock_release(
         from .database import get_database
 
         db = get_database()
-        result = release_lock(db, lock_name, owner_token)
+        result = release_lock(db, name, owner)
 
         if result["success"]:
-            typer.echo("success=true")
+            typer.echo("released=True")
         else:
-            typer.echo(f"success=false,reason={result['reason']}")
+            typer.echo("released=False")
             raise typer.Exit(1)
 
     except Exception as e:
@@ -367,20 +363,20 @@ def ai_lock_release(
 
 @lock_app.command("status")
 def ai_lock_status(
-    lock_name: str = typer.Option(..., help="Name of the lock to check"),
+    name: str = typer.Option(..., help="Name of the lock to check"),
 ) -> None:
     """Get status of an advisory lock."""
     try:
-        import json
-
         from .ai.lock import lock_status
         from .database import get_database
 
         db = get_database()
-        result = lock_status(db, lock_name)
+        result = lock_status(db, name)
 
-        # Compact JSON with sorted keys
-        typer.echo(json.dumps(result, sort_keys=True, separators=(",", ":")))
+        if result["exists"]:
+            typer.echo(f"locked=True,owner={result['owner_token']},expires_utc_ms={result['expires_utc_ms']},expired=False")
+        else:
+            typer.echo("locked=False,owner=none,expires_utc_ms=none,expired=False")
 
     except Exception as e:
         typer.echo(f"Error: {e}", err=True)
