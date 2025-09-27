@@ -21,7 +21,9 @@
       "Bash(timeout 12 python -m lb3 run)",
       "Bash(echo \"Exit code: $?\")",
       "Bash(timeout:*)",
-      "Bash(git rev-parse:*)"
+      "Bash(git rev-parse:*)",
+      "Bash(git fetch:*)",
+      "Bash(git rebase:*)"
     ],
     "deny": [],
     "ask": []
