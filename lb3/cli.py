@@ -1061,6 +1061,70 @@ def ai_summarise(
         raise typer.Exit(1) from e
 
 
+@ai_app.command("tick")
+def ai_tick(
+    now_utc_ms: int = typer.Option(..., help="Current time in UTC milliseconds"),
+    backfill_hours: int = typer.Option(6, help="Hours to backfill from now"),
+    grace_minutes: int = typer.Option(5, help="Minutes to skip for incomplete hours"),
+    idle_mode: str = typer.Option(
+        "simple", help="Idle calculation mode: simple or session-gap"
+    ),
+    do_daily: bool = typer.Option(False, help="Force daily processing"),
+) -> None:
+    """Execute one-shot orchestration of hourly and daily AI pipeline."""
+    try:
+        from .ai import run, tick
+        from .database import get_database
+
+        db = get_database()
+
+        # Start run
+        run_id = run.start_run(
+            db,
+            {
+                "now_utc_ms": now_utc_ms,
+                "backfill_hours": backfill_hours,
+                "grace_minutes": grace_minutes,
+                "idle_mode": idle_mode,
+                "do_daily": do_daily,
+            },
+        )
+
+        try:
+            # Execute tick orchestration
+            counters = tick.tick_once(
+                db,
+                now_utc_ms,
+                backfill_hours,
+                grace_minutes,
+                idle_mode,
+                do_daily,
+                run_id,
+            )
+
+            # Update run ID in counters
+            counters["run_id"] = run_id
+
+            # Output exactly one line with all counters
+            output_parts = []
+            for key, value in counters.items():
+                output_parts.append(f"{key}={value}")
+
+            typer.echo(f"tick {','.join(output_parts)}")
+
+            # Finish run successfully
+            run.finish_run(db, run_id, "ok")
+
+        except Exception as e:
+            # Finish run with error
+            run.finish_run(db, run_id, "failed")
+            raise e
+
+    except Exception as e:
+        typer.echo(f"Error: {e}", err=True)
+        raise typer.Exit(1) from e
+
+
 @ai_app.command("hour")
 def ai_hour_show(
     hstart_utc_ms: int = typer.Option(..., help="Hour start time in UTC milliseconds"),
