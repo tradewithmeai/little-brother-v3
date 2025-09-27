@@ -1,6 +1,8 @@
 """Command line interface for Little Brother v3."""
 
 import contextlib
+import time
+import uuid
 
 import typer
 
@@ -99,6 +101,10 @@ ai_app.add_typer(lock_app, name="lock")
 # AI Advice commands
 advice_app = typer.Typer(help="AI advice generation and display commands")
 ai_app.add_typer(advice_app, name="advise")
+
+# AI Notification commands
+notify_app = typer.Typer(help="AI notification and digest generation commands")
+ai_app.add_typer(notify_app, name="notify")
 
 # AI Dev commands
 dev_app = typer.Typer(help="AI development and debugging commands")
@@ -671,6 +677,237 @@ def ai_advice_list_rules() -> None:
 
         for rule_key, version, title in rows:
             typer.echo(f"{rule_key},{version},{title}")
+
+    except Exception as e:
+        typer.echo(f"Error: {e}", err=True)
+        raise typer.Exit(1) from e
+
+
+# AI Notification commands
+@notify_app.command("hourly")
+def ai_notify_hourly(
+    hstart_utc_ms: int = typer.Option(..., help="Hour start time in UTC milliseconds"),
+    formats: str = typer.Option("txt,json", help="Comma-separated formats (txt,json)"),
+) -> None:
+    """Generate hourly digest files."""
+    try:
+        import datetime
+
+        from .ai.digest import (
+            ensure_digests_dir,
+            render_hourly_digest,
+            upsert_digest_record,
+            write_json,
+            write_text,
+        )
+        from .ai.lock import acquire_lock, release_lock
+        from .ai.run import finish_run, start_run
+        from .database import get_database
+
+        db = get_database()
+
+        # Acquire advisory lock
+        lock_result = acquire_lock(db, "notify-hourly", 300)
+        if not lock_result["success"]:
+            typer.echo(f"Error: {lock_result['reason']}", err=True)
+            raise typer.Exit(1)
+
+        owner_token = lock_result["owner_token"]
+
+        try:
+            # Start run
+            run_id = start_run(db, {"hstart_utc_ms": hstart_utc_ms, "formats": formats})
+
+            hend_ms = hstart_utc_ms + 3600000
+            current_ms = int(time.time() * 1000)
+
+            # Render digest
+            digest_data = render_hourly_digest(db, hstart_utc_ms, hend_ms)
+
+            if not digest_data["hour_hash"]:
+                typer.echo("Error: No data found for specified hour", err=True)
+                raise typer.Exit(1)
+
+            # Generate files
+            digests_dir = ensure_digests_dir()
+            dt = datetime.datetime.fromtimestamp(
+                hstart_utc_ms / 1000, tz=datetime.timezone.utc
+            )
+            date_dir = (
+                digests_dir / f"{dt.year:04d}" / f"{dt.month:02d}" / f"{dt.day:02d}"
+            )
+
+            hash8 = digest_data["hour_hash"][:8]
+            file_paths = []
+            format_list = [f.strip() for f in formats.split(",")]
+
+            for format_type in format_list:
+                if format_type not in ["txt", "json"]:
+                    continue
+
+                filename = f"hourly-digest-{hstart_utc_ms}-{hash8}.{format_type}"
+                file_path = date_dir / filename
+                relative_path = file_path.relative_to(digests_dir)
+
+                if format_type == "txt":
+                    file_sha256 = write_text(file_path, digest_data["txt"])
+                else:  # json
+                    file_sha256 = write_json(file_path, digest_data["json"])
+
+                # Upsert digest record
+                digest_id = uuid.uuid4().hex
+                upsert_digest_record(
+                    db,
+                    digest_id,
+                    "hourly_digest",
+                    hstart_utc_ms,
+                    hend_ms,
+                    format_type,
+                    str(relative_path),
+                    file_sha256,
+                    current_ms,
+                    run_id,
+                    digest_data["hour_hash"],
+                )
+
+                file_paths.append(str(relative_path))
+
+            # Finish run
+            finish_run(db, run_id, "ok")
+
+        finally:
+            # Release lock
+            release_lock(db, "notify-hourly", owner_token)
+
+        typer.echo(f"hourly_digest hstart={hstart_utc_ms} files={','.join(file_paths)}")
+
+    except Exception as e:
+        typer.echo(f"Error: {e}", err=True)
+        raise typer.Exit(1) from e
+
+
+@notify_app.command("daily")
+def ai_notify_daily(
+    day_utc_ms: int = typer.Option(
+        ..., help="Day start time in UTC milliseconds (midnight)"
+    ),
+    formats: str = typer.Option("txt,json", help="Comma-separated formats (txt,json)"),
+) -> None:
+    """Generate daily digest files."""
+    try:
+        import datetime
+
+        from .ai.digest import (
+            ensure_digests_dir,
+            render_daily_digest,
+            upsert_digest_record,
+            write_json,
+            write_text,
+        )
+        from .ai.lock import acquire_lock, release_lock
+        from .ai.run import finish_run, start_run
+        from .database import get_database
+
+        db = get_database()
+
+        # Acquire advisory lock
+        lock_result = acquire_lock(db, "notify-daily", 600)
+        if not lock_result["success"]:
+            typer.echo(f"Error: {lock_result['reason']}", err=True)
+            raise typer.Exit(1)
+
+        owner_token = lock_result["owner_token"]
+
+        try:
+            # Start run
+            run_id = start_run(db, {"day_utc_ms": day_utc_ms, "formats": formats})
+
+            current_ms = int(time.time() * 1000)
+
+            # Render digest
+            digest_data = render_daily_digest(db, day_utc_ms)
+
+            if not digest_data["day_hash"]:
+                typer.echo("Error: No data found for specified day", err=True)
+                raise typer.Exit(1)
+
+            # Generate files
+            digests_dir = ensure_digests_dir()
+            dt = datetime.datetime.fromtimestamp(
+                day_utc_ms / 1000, tz=datetime.timezone.utc
+            )
+            date_dir = (
+                digests_dir / f"{dt.year:04d}" / f"{dt.month:02d}" / f"{dt.day:02d}"
+            )
+
+            hash8 = digest_data["day_hash"][:8]
+            file_paths = []
+            format_list = [f.strip() for f in formats.split(",")]
+
+            for format_type in format_list:
+                if format_type not in ["txt", "json"]:
+                    continue
+
+                filename = f"daily-digest-{day_utc_ms}-{hash8}.{format_type}"
+                file_path = date_dir / filename
+                relative_path = file_path.relative_to(digests_dir)
+
+                if format_type == "txt":
+                    file_sha256 = write_text(file_path, digest_data["txt"])
+                else:  # json
+                    file_sha256 = write_json(file_path, digest_data["json"])
+
+                # Upsert digest record
+                digest_id = uuid.uuid4().hex
+                upsert_digest_record(
+                    db,
+                    digest_id,
+                    "daily_digest",
+                    day_utc_ms,
+                    day_utc_ms + 86400000,  # End of day
+                    format_type,
+                    str(relative_path),
+                    file_sha256,
+                    current_ms,
+                    run_id,
+                    digest_data["day_hash"],
+                )
+
+                file_paths.append(str(relative_path))
+
+            # Finish run
+            finish_run(db, run_id, "ok")
+
+        finally:
+            # Release lock
+            release_lock(db, "notify-daily", owner_token)
+
+        typer.echo(f"daily_digest day_start={day_utc_ms} files={','.join(file_paths)}")
+
+    except Exception as e:
+        typer.echo(f"Error: {e}", err=True)
+        raise typer.Exit(1) from e
+
+
+@notify_app.command("show")
+def ai_notify_show(
+    path: str = typer.Option(..., help="Relative path from digests directory"),
+) -> None:
+    """Show digest file content verbatim."""
+    try:
+        from .ai.digest import ensure_digests_dir
+
+        digests_dir = ensure_digests_dir()
+        file_path = digests_dir / path
+
+        if not file_path.exists():
+            typer.echo(f"Error: File not found: {path}", err=True)
+            raise typer.Exit(1)
+
+        # Read and print verbatim
+        with file_path.open("r", encoding="utf-8") as f:
+            content = f.read()
+            typer.echo(content, nl=False)
 
     except Exception as e:
         typer.echo(f"Error: {e}", err=True)

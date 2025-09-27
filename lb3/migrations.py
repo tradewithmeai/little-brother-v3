@@ -1,6 +1,6 @@
 """Database migration framework for Little Brother v3."""
 
-LATEST_SCHEMA_VERSION = 5
+LATEST_SCHEMA_VERSION = 6
 
 MIGRATIONS = [
     {
@@ -152,6 +152,27 @@ MIGRATIONS = [
         ('low_daily_focus', 1, 'Low Daily Focus', 'Warns when daily focused time drops below 3 hours'),
         ('positive_deep_focus_day', 1, 'Strong Daily Deep Focus', 'Celebrates days with significant deep focus'),
         ('high_switch_day', 1, 'High Daily Switching', 'Warns when daily context switches exceed 150');
+        """,
+    },
+    {
+        "version": 6,
+        "name": "digest_v1",
+        "sql": """
+        CREATE TABLE IF NOT EXISTS ai_digest(
+            digest_id TEXT PRIMARY KEY,
+            kind TEXT NOT NULL,
+            period_start_ms INTEGER NOT NULL,
+            period_end_ms INTEGER NOT NULL,
+            format TEXT NOT NULL,
+            file_path TEXT NOT NULL,
+            file_sha256 TEXT NOT NULL,
+            generated_utc_ms INTEGER NOT NULL,
+            run_id TEXT NOT NULL REFERENCES ai_run(run_id),
+            input_hash_hex TEXT NOT NULL,
+            UNIQUE(kind, period_start_ms, format)
+        );
+
+        CREATE INDEX IF NOT EXISTS idx_ai_digest_period ON ai_digest(kind, period_start_ms);
         """,
     },
 ]
